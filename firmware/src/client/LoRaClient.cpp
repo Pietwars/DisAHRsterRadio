@@ -26,6 +26,9 @@ void LoRaClient::receive(struct Datagram datagram, size_t len)
     size_t msgLen;
 
     // forward all messages to LL2, except those of type 'i'(info)
+    if(datagram.type == 'B'){
+        return; // lokale Brett-Eingabe, BoardClient funkt selbst als 'b'
+    }
     if(datagram.type == 'i'){
         if(memcmp(&datagram.message[0], "addr", 4) == 0){
             char localAddr[8] = {'\0'};

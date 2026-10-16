@@ -45,10 +45,14 @@ Heltec V2: WLAN-Sendeleistung auf 8,5 dBm reduziert und gestaffelter Start (600 
 - Chat an alle (disaster-radio-WebSocket `/ws`, Format `<ID 2 Byte>c|<Name> Text`, Zustellbestätigung ✓ = vom Gerät angenommen, *nicht* beim Empfänger)
 - Schnellmeldungen (Trinkwasser, Strom, Medikamente, Verletzt, Evakuierung, „Mir geht es gut“, Hilfe-Angebote)
 - Standort: GPS des Telefons (funktioniert im Browser oft nur über HTTPS) oder Auswahl aus der Ortsliste Ahrtal (Ahrweiler … Sinzig)
+- **Schwarzes Brett:** Aushänge (optional „wichtig/angeheftet“, Laufzeit 6 h – 7 Tage) werden auf jedem Gerät in LittleFS (`/board.txt`) gespeichert, per Funk als eigener Datagramm-Typ `b` verteilt, anhand einer zufälligen 8-stelligen ID entdoppelt und von jedem Gerät einmal weitergesendet (Mehrsprung). Alle ~5 min sendet jedes Gerät einen gespeicherten Aushang erneut, damit später eingeschaltete Geräte nachziehen. Max. 30 Aushänge pro Gerät; `GET /api/board`
+- **Offline-Karte:** fünf OSM-Pakete aus DisasterMesh (Ahrtal-Übersicht, Heimersheim mit Gebäuden, Dernau/Ahrweiler, Altenahr, Sinzig), kompakt und gzip-komprimiert (zusammen ca. 280 KB) im LittleFS; Anzeige mit Orten, Versorgungspunkten, eigener Position und Positionen aus Chat-/Brett-Nachrichten (Koordinaten im Text). Erzeugen mit `tools/make_map.py`. © OpenStreetMap-Mitwirkende, ODbL 1.0 (`web/static/map/ODbL-1.0.txt`)
 - Geräteinfo über `GET /api/info` (JSON)
 - Demo ohne Gerät: `web/static/index.html?demo=1` lokal öffnen
 
-Die MeshCore-spezifischen Funktionen aus DisasterMesh (Kanäle, Direktnachrichten, Schwarzes Brett, Karten, POIs, Admin) sind **nicht** übernommen.
+Die MeshCore-spezifischen Funktionen aus DisasterMesh (Kanäle, Direktnachrichten, Karten-Download/-Import, eigene POIs, Admin) sind **nicht** übernommen.
+
+![Schwarzes Brett](docs/images/dar-brett.png) ![Karte](docs/images/dar-karte.png)
 
 ## Erste Schritte
 
@@ -62,12 +66,19 @@ pio device monitor                     # zeigt WLAN-Name und Passwort
 
 Dann mit dem WLAN `DisAHRsterRadio-XXXXXX` verbinden und `http://192.168.4.1` öffnen (oder `http://disahrster.local`). Seriell/Telnet (Port 23) gibt es weiterhin die disaster-radio-Konsole.
 
+## Fertige Flash-Pakete
+
+`tools/package.sh` baut je Board ein ZIP mit `factory.bin` (ab 0x0), Einzelteilen, `SHA256SUMS` und `ANLEITUNG.md` (esptool-js, Update nur `firmware.bin` an 0x10000).
+
 ## Bekannte Grenzen / offene Arbeit
 
 - Hardwaretest auf allen drei Boards (Funk zwischen zwei Geräten, Reichweite, Stromaufnahme, Heltec-Brownout)
 - Pinbelegung T3-S3 und T3 V1.6.1 nach Datenblatt/LILYGO-Beispielen gesetzt, nicht gemessen
 - Keine Verschlüsselung/Signatur der Nachrichten (alle mit gleicher Frequenz können mitlesen und Namen fälschen)
 - Nachrichtenlänge max. ca. 220 Byte; kein Direktchat, keine Kanäle
+- **Chat ist nur Einzelsprung:** LoRaLayer2 leitet Broadcasts nicht weiter (upstream-Verhalten). Nur das Schwarze Brett wird über mehrere Geräte weitergereicht
+- Brett: Ablaufzeit läuft nur, solange das Gerät an ist (keine Uhr); Aushänge können nicht gelöscht werden; jeder kann „wichtig“ setzen; `littlefs.bin` neu flashen löscht die Aushänge
+- Karte: keine Navigation, keine Kacheln, keine Gebäude außer Heimersheim; Datenstand 16.10.2026
 - Einstellung `loraFrq` ist ganzzahlig (869 = 869,525 MHz)
 - OLED-, GPS-, SD- und History-Code von disaster-radio übernommen, ungetestet
 

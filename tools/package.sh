@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Erzeugt flashbare Pakete je Board: factory.bin (ab 0x0) + Einzelteile + SHA256SUMS + ANLEITUNG.md
+set -euo pipefail
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+OUT=${1:-$ROOT/dist}
+FW=$ROOT/firmware
+ESPTOOL=${ESPTOOL:-"python3 -m esptool"}
+BOOTAPP0=$(find ~/.platformio/packages/framework-arduinoespressif32 -name boot_app0.bin | head -1)
+VERSION=$(grep -o 'DAR_VERSION "[^"]*"' $FW/config.h | cut -d'"' -f2)
+COMMIT=$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unbekannt)
+mkdir -p "$OUT"
+declare -A CHIP=([t3s3-sx1262]=esp32s3 [t3-v161-sx1276]=esp32 [heltec-v2-sx1276]=esp32)
+declare -A BOOT=([t3s3-sx1262]=0x0 [t3-v161-sx1276]=0x1000 [heltec-v2-sx1276]=0x1000)
+declare -A NAME=([t3s3-sx1262]="LILYGO T3-S3 (SX1262)" [t3-v161-sx1276]="LILYGO T3 V1.6.1 (SX1276)" [heltec-v2-sx1276]="Heltec WiFi LoRa 32 V2 (SX1276)")
+declare -A ZIP=([t3s3-sx1262]=t3s3 [t3-v161-sx1276]=t3-v161 [heltec-v2-sx1276]=heltec-v2)
+for env in t3s3-sx1262 t3-v161-sx1276 heltec-v2-sx1276; do
+  (cd $FW && pio run -e $env && pio run -e $env -t buildfs) >/dev/null
+  B=$FW/.pio/build/$env; D=$OUT/DisAHRsterRadio-${ZIP[$env]}; rm -rf "$D"; mkdir -p "$D/teile"
+  cp $B/bootloader.bin $B/partitions.bin $B/firmware.bin $B/littlefs.bin "$D/teile/"; cp "$BOOTAPP0" "$D/teile/boot_app0.bin"
+  $ESPTOOL --chip ${CHIP[$env]} merge-bin -o "$D/DisAHRsterRadio-${ZIP[$env]}-factory.bin" --flash-mode keep --flash-freq keep --flash-size 4MB \
+    ${BOOT[$env]} $B/bootloader.bin 0x8000 $B/partitions.bin 0xe000 "$BOOTAPP0" 0x10000 $B/firmware.bin 0x200000 $B/littlefs.bin >/dev/null
+  sed -e "s/@BOARD@/${NAME[$env]}/g" -e "s/@ZIP@/${ZIP[$env]}/g" -e "s/@CHIP@/${CHIP[$env]}/g" -e "s/@BOOT@/${BOOT[$env]}/g" \
+      -e "s/@VERSION@/$VERSION/g" -e "s/@COMMIT@/$COMMIT/g" "$ROOT/tools/ANLEITUNG.template.md" > "$D/ANLEITUNG.md"
+  (cd "$D" && sha256sum DisAHRsterRadio-${ZIP[$env]}-factory.bin teile/*.bin > SHA256SUMS)
+  rm -f "$OUT/DisAHRsterRadio-${ZIP[$env]}.zip"; (cd "$OUT" && python3 -m zipfile -c "DisAHRsterRadio-${ZIP[$env]}.zip" "DisAHRsterRadio-${ZIP[$env]}")
+  echo "$env -> $OUT/DisAHRsterRadio-${ZIP[$env]}.zip"
+done

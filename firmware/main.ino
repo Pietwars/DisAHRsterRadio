@@ -31,6 +31,7 @@
 #include "client/TCPClient.h"
 #include "client/WebSocketClient.h"
 #include "client/GPSClient.h"
+#include "client/BoardClient.h"
 #include "client/BleUartClient.h"
 
 // middleware
@@ -91,6 +92,7 @@ float loraFreqMHz() { return loraFrq == 869 ? LORA_DEFAULT_FREQ_MHZ : (float)lor
 
 DisasterRadio *radio = new DisasterRadio();
 DisasterHistory *history = NULL;
+BoardClient *board = NULL;
 
 int internal_clients = 0;
 int clients = 0;
@@ -216,7 +218,7 @@ void setupSD()
 void setupFS()
 {
   Serial.println("* Initializing LittleFS...");
-  if (LittleFS.begin())
+  if (LittleFS.begin(true))
   {
     fsInitialized = true;
   }
@@ -262,6 +264,10 @@ void setupHTTPSever()
              DAR_VERSION, BOARD_NAME, nodeAddress, ssid, loraInitialized ? "true" : "false", loraFreqMHz(), spreadingFactor,
              txPower, routes, clients, sdInitialized ? "true" : "false", (unsigned long)(millis() / 1000));
     request->send(200, "application/json", json);
+  });
+
+  http_server.on("/api/board", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "application/json", board ? board->toJson() : String("[]"));
   });
 
   http_server.onNotFound([](AsyncWebServerRequest *request) {
@@ -590,6 +596,8 @@ void setup()
   {
   setupBLE();
   }
+  board = new BoardClient(fsInitialized ? (fs::FS *)&LittleFS : NULL);
+  radio->connect(board);
   delay(STARTUP_STAGGER_MS);
   setupLoRa();
   setupDisplay();

@@ -16,3 +16,4 @@ hardware/board_esp32_v3/**
 .vscode
 secrets.h
 firmware/.pio
+dist/

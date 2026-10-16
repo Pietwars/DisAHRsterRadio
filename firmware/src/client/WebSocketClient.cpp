@@ -27,6 +27,7 @@ void WebSocketClient::handleData(void *data, size_t len)
     struct Datagram datagram = {0xff, 0xff, 0xff, 0xff};
     memset(datagram.message, 0, 233);
     datagram.type = 'c';
+    if (len > MESSAGE_LENGTH) len = MESSAGE_LENGTH;
     memcpy(&datagram.message, data, len);
     len = len+DATAGRAM_HEADER;
 
@@ -35,6 +36,14 @@ void WebSocketClient::handleData(void *data, size_t len)
     memcpy(&msg_id_buf, data, 2);
     msg_id_buf[2] = '!';
     client->binary(msg_id_buf, 3);
+
+  // Schwarzes Brett: lokal an BoardClient, der dedupliziert und funkt
+  if (len >= DATAGRAM_HEADER + 4 && datagram.message[2] == 'b' && datagram.message[3] == '|')
+  {
+    datagram.type = 'B';
+    server->transmit(this, datagram, len);
+    return;
+  }
 
   if (datagram.message[4] == '~')
   {

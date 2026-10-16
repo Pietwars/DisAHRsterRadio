@@ -12,7 +12,7 @@ header h1{margin:0;font-size:1.3rem}header small{color:var(--sage)}
 #st{position:absolute;top:8px;right:10px;padding:3px 9px;border-radius:12px;font-size:.8rem;background:#0008}
 #st.ok{color:var(--mesh)}#st.bad{color:#ff9aa8}
 .warn{background:#3a1d26;border-left:4px solid var(--wine);padding:6px 10px;font-size:.85rem}
-nav{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}nav button{flex:1;background:none;border:0;color:#cfe;padding:10px 6px;font-size:.95rem;border-bottom:3px solid transparent}
+nav{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}nav button{flex:1 0 auto;background:none;border:0;color:#cfe;padding:10px 6px;font-size:.95rem;border-bottom:3px solid transparent}
 nav button.on{border-color:var(--mesh);color:var(--mesh)}
 main{flex:1;display:flex;flex-direction:column;min-height:0}section{display:none;padding:10px;flex:1;flex-direction:column;gap:8px}section.on{display:flex}
 #log{flex:1;overflow-y:auto;min-height:200px;display:flex;flex-direction:column;gap:5px}
@@ -25,10 +25,18 @@ button.b{background:var(--mesh);color:#102;border:0;border-radius:8px;padding:9p
 .muted{color:#9ab;font-size:.85rem;margin:0}.places{display:flex;flex-direction:column;gap:4px}.places button{text-align:left}
 table{border-collapse:collapse;font-size:.9rem}td{padding:3px 8px;border-bottom:1px solid #1d3346}
 h2{margin:4px 0;font-size:1.05rem}
+.post{background:var(--card);border-radius:10px;padding:8px 10px;border-left:4px solid #3c5a6e}.post.pin{border-left-color:#ffb84d;background:#2a2618}
+.post .h{font-size:.78rem;color:#9ab;display:flex;justify-content:space-between;gap:6px}.post .tx{margin-top:3px;white-space:pre-wrap;word-wrap:break-word}
+#posts{display:flex;flex-direction:column;gap:6px;overflow-y:auto;flex:1}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.row label{font-size:.9rem;display:flex;gap:4px;align-items:center}.row select{flex:0 1 auto}
+#mapwrap{position:relative;flex:1;min-height:340px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#0d1a22;touch-action:none}
+#map{position:absolute;inset:0;width:100%;height:100%}#mapattr{position:absolute;right:4px;bottom:2px;font-size:.62rem;color:#9ab;background:#0009;padding:1px 4px}
+#mapctl{position:absolute;left:6px;top:6px;display:flex;flex-direction:column;gap:4px}#mapctl button{width:34px;height:34px;padding:0;font-size:1.1rem}
+.legend{font-size:.78rem;color:#9ab;display:flex;gap:10px;flex-wrap:wrap}.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:3px;vertical-align:-1px}
 </style></head><body>
 <header><div id="st" class="bad">getrennt</div><div class="t"><h1>DisAHRsterRadio</h1><small>Ahrtal · LoRa-Mesh-Chat ohne Internet</small></div></header>
 <div class="warn">Kein zertifiziertes Notrufsystem. In Lebensgefahr immer <b>112</b> wählen, wenn irgendwie möglich.</div>
-<nav><button data-tab="chat" class="on">Chat</button><button data-tab="quick">Schnellmeldung</button><button data-tab="loc">Standort</button><button data-tab="info">Gerät</button></nav>
+<nav><button data-tab="chat" class="on">Chat</button><button data-tab="quick">Schnellmeldung</button><button data-tab="board">Brett</button><button data-tab="map">Karte</button><button data-tab="loc">Standort</button><button data-tab="info">Gerät</button></nav>
 <main>
 <section id="chat" class="on"><div id="log"></div>
 <form id="f"><input id="msg" maxlength="200" autocomplete="off" placeholder="Nachricht an alle …"><button class="b">Senden</button></form>
@@ -37,6 +45,14 @@ h2{margin:4px 0;font-size:1.05rem}
 <div class="quick-grid" id="qg"></div>
 <textarea id="qtext" rows="3" maxlength="200"></textarea>
 <form id="qf"><select id="qplace"></select><button class="b">Senden</button></form></section>
+<section id="board"><h2>Schwarzes Brett</h2><p class="muted">Aushänge werden auf jedem Gerät gespeichert und per Funk weitergegeben (auch über mehrere Geräte). Max. 30 Aushänge, sie laufen automatisch ab.</p>
+<div id="posts"></div>
+<textarea id="btext" rows="3" maxlength="170" placeholder="Aushang, z. B. „Trinkwasser-Ausgabe am Rathaus 14–17 Uhr“"></textarea>
+<div class="row"><label><input type="checkbox" id="bpin"> Wichtig / anheften</label><select id="bttl"><option value="360">6 Stunden</option><option value="1440" selected>1 Tag</option><option value="4320">3 Tage</option><option value="10080">7 Tage</option></select><button class="b" id="bsend" type="button">Aushängen</button></div></section>
+<section id="map"><div class="row"><select id="mapsel"><option value="ahrtal">Ahrtal (Übersicht)</option><option value="heimersheim">Heimersheim (Detail)</option><option value="dernau">Dernau · Ahrweiler</option><option value="altenahr">Altenahr · Mayschoß · Rech</option><option value="sinzig">Sinzig</option></select><button class="b b2" id="mapme" type="button">📍 Ich</button><button class="b b2" id="mapfit" type="button">Alles</button></div>
+<div id="mapwrap"><canvas id="cv"></canvas><div id="mapctl"><button class="b b2" id="zin" type="button">+</button><button class="b b2" id="zout" type="button">−</button></div><div id="mapattr">© OpenStreetMap-Mitwirkende · ODbL</div></div>
+<div class="legend"><span><i style="background:#9ee576"></i>ich</span><span><i style="background:#6ab0e0"></i>gemeldete Positionen</span><span><i style="background:#ffb84d"></i>Brett</span><span><i style="background:#ff7d8f"></i>Apotheke/Arzt</span><span><i style="background:#4dd2ff"></i>Wasser</span></div>
+<p class="muted" id="mapinfo">Positionen aus Chat- und Brett-Nachrichten (Koordinaten im Text) werden angezeigt. Keine Navigation.</p></section>
 <section id="loc"><h2>Standort</h2><p class="muted">GPS des Telefons funktioniert im Browser oft nur über HTTPS. Sonst bitte Ort aus der Liste wählen.</p>
 <form id="gf" onsubmit="return false"><button class="b b2" id="gps" type="button">📍 GPS-Position holen</button></form>
 <p id="gpsres" class="muted"></p><h2>Orte im Ahrtal</h2><div class="places" id="pl"></div></section>
@@ -50,20 +66,21 @@ const KIND={H:'HILFE',I:'INFO',A:'ANGEBOT'};
 const $=s=>document.querySelector(s),enc=new TextEncoder(),dec=new TextDecoder();
 const DEMO=/[?&]demo/.test(location.search);
 let ws,cid=0,pending={},name=localStorage.getItem('dar-name')||'',myPos=localStorage.getItem('dar-pos')||'';
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button,section').forEach(e=>e.classList.remove('on'));b.classList.add('on');$('#'+b.dataset.tab).classList.add('on');if(b.dataset.tab=='info')info()});
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button,section').forEach(e=>e.classList.remove('on'));b.classList.add('on');$('#'+b.dataset.tab).classList.add('on');if(b.dataset.tab=='info')info();if(b.dataset.tab=='map')loadMap();if(b.dataset.tab=='board')renderPosts()});
 function esc(t){return t.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function show(t,type,id){const d=document.createElement('div');d.className='m '+(type||'');const tm=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+function show(t,type,id){notePos(t);const d=document.createElement('div');d.className='m '+(type||'');const tm=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
  let m=t.match(/^<([^>]{1,32})>\s?([\s\S]*)$/),h;
  if(t.startsWith('~')){d.className='m sys';h=esc(t.slice(1).trim().replace(' joined the channel',' ist beigetreten'))}
  else if(m)h='<span class="n">'+esc(m[1])+'</span>'+esc(m[2]).replace(/(-?\d+\.\d{3,}),\s?(-?\d+\.\d{3,})/g,'<a style="color:var(--sage)" href="geo:$1,$2">$1,$2</a>');else h=esc(t);
  d.innerHTML=h+'<span class="tm">'+tm+(id!==undefined?' <span class="pend" id="p'+id+'">⏳</span>':'')+'</span>';$('#log').append(d);$('#log').scrollTop=1e9}
 function status(ok){$('#st').textContent=ok?'verbunden':'getrennt';$('#st').className=ok?'ok':'bad'}
 function connect(){if(DEMO)return demo();ws=new WebSocket((location.protocol=='https:'?'wss://':'ws://')+location.host+'/ws');ws.binaryType='arraybuffer';
- ws.onopen=()=>{status(1);if(name)raw('~ '+name+' joined the channel')};ws.onclose=()=>{status(0);setTimeout(connect,3000)};
+ ws.onopen=()=>{status(1);loadBoard();if(name)raw('~ '+name+' joined the channel')};ws.onclose=()=>{status(0);setTimeout(connect,3000)};
  ws.onmessage=e=>{const b=new Uint8Array(e.data);if(b.length<3)return;const id=b[0]|b[1]<<8,s=dec.decode(b.slice(2));
   if(s==='!'){const p=document.getElementById('p'+id);if(p){p.textContent='✓';p.className=''}return}
+  if(s.startsWith('b|'))return addPost(s.slice(2),1);
   if(s.startsWith('c|'))show(s.slice(2),s.slice(2).startsWith('<'+name+'>')?'self':'')}}
-function raw(text,mark){const id=cid=(cid+1)&0xffff,p=enc.encode('c|'+text),b=new Uint8Array(p.length+2);b[0]=id&255;b[1]=id>>8;b.set(p,2);
+function raw(text,mark,ns){const id=cid=(cid+1)&0xffff,p=enc.encode((ns||'c')+'|'+text),b=new Uint8Array(p.length+2);b[0]=id&255;b[1]=id>>8;b.set(p,2);
  if(DEMO){setTimeout(()=>{const x=document.getElementById('p'+id);if(x){x.textContent='✓';x.className=''}},400)}else if(ws&&ws.readyState==1)ws.send(b);else{alert('Nicht verbunden');return false}
  if(mark)show(text,'self',id);return true}
 function send(text){if(!name){name=(prompt('Dein Name (sichtbar für alle):')||'').trim().replace(/[<>\s]+/g,'_').slice(0,20);if(!name)return;localStorage.setItem('dar-name',name);raw('~ '+name+' joined the channel',false);who()}
@@ -76,13 +93,73 @@ $('#qf').onsubmit=e=>{e.preventDefault();let t=$('#qtext').value.trim();if(!t)re
  if(v==='own'&&myPos)t+=' @ '+myPos;else if(v!==''&&v!=='own'){const p=PLACES[v];t+=' @ '+p[0]+' ('+p[1].toFixed(4)+','+p[2].toFixed(4)+')'}
  send(t);$('#qtext').value='';document.querySelector('nav button').click()};
 $('#pl').innerHTML=PLACES.map((p,i)=>'<button class="b b2" data-i="'+i+'">'+p[0]+' <span class="muted">'+p[1].toFixed(4)+', '+p[2].toFixed(4)+'</span></button>').join('');
-$('#pl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=PLACES[b.dataset.i];myPos=p[0]+' ('+p[1].toFixed(4)+','+p[2].toFixed(4)+')';localStorage.setItem('dar-pos',myPos);$('#gpsres').textContent='Gewählt: '+myPos;who()};
+$('#pl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=PLACES[b.dataset.i];myPos=p[0]+' ('+p[1].toFixed(4)+','+p[2].toFixed(4)+')';localStorage.setItem('dar-pos',myPos);setMe(p[1],p[2]);$('#gpsres').textContent='Gewählt: '+myPos;who()};
 $('#gps').onclick=()=>{if(!navigator.geolocation)return $('#gpsres').textContent='Kein GPS im Browser verfügbar.';$('#gpsres').textContent='Suche Position …';
- navigator.geolocation.getCurrentPosition(p=>{myPos=p.coords.latitude.toFixed(5)+','+p.coords.longitude.toFixed(5)+' (±'+Math.round(p.coords.accuracy)+' m)';localStorage.setItem('dar-pos',myPos);$('#gpsres').textContent='Position: '+myPos;who()},
+ navigator.geolocation.getCurrentPosition(p=>{myPos=p.coords.latitude.toFixed(5)+','+p.coords.longitude.toFixed(5)+' (±'+Math.round(p.coords.accuracy)+' m)';localStorage.setItem('dar-pos',myPos);setMe(p.coords.latitude,p.coords.longitude);$('#gpsres').textContent='Position: '+myPos;who()},
  e=>{$('#gpsres').textContent='GPS nicht möglich ('+e.message+'). Bitte Ort aus der Liste wählen.'},{enableHighAccuracy:true,timeout:15000})};
 async function info(){let d;try{d=DEMO?{name:'DisAHRsterRadio',version:'0.1.0-dev',board:'LILYGO T3-S3 SX1262',node:'a1b2c3d4',ssid:'DisAHRsterRadio-B2C3D4',lora:true,freq:869.525,sf:9,txPower:14,routes:2,clients:3,sd:false,uptime:4711}:await (await fetch('/api/info')).json()}catch(e){$('#it').innerHTML='<tr><td>Keine Gerätedaten</td></tr>';return}
  const L={board:'Board',version:'Firmware',node:'Knotenadresse',ssid:'WLAN',lora:'LoRa aktiv',freq:'Frequenz (MHz)',sf:'Spreizfaktor',txPower:'Sendeleistung (dBm)',routes:'Routen',clients:'Verbundene Clients',sd:'SD-Karte',uptime:'Laufzeit (s)'};
  $('#it').innerHTML=Object.keys(L).map(k=>'<tr><td>'+L[k]+'</td><td>'+esc(String(d[k]===true?'ja':d[k]===false?'nein':d[k]))+'</td></tr>').join('')}
 function demo(){status(1);if(!name){name='Peter';}[ '~ Anna joined the channel','<Anna> Heimersheim: Wasser steht in der Bachstraße, Brücke gesperrt.','<Jonas> [HILFE] Trinkwasser benötigt, Personen: 4 @ Lohrsdorf (50.5515,7.1865)','<Peter> Bin auf dem Weg, bringe 2 Kanister mit.','<Mia> [ANGEBOT] Strom/Ladestation verfügbar @ Bad Neuenahr (50.5449,7.1377)'].forEach(t=>show(t,t.startsWith('<Peter>')?'self':''))}
-who();connect();
+
+/* ---------- Schwarzes Brett ---------- */
+let posts={};
+function addPost(s,live){const a=s.split('|');if(a.length<5||!/^[0-9a-f]{8}$/i.test(a[0]))return;const id=a[0];if(posts[id])return;
+ posts[id]={id,pinned:a[1].includes('P'),ttlMin:+a[2]||1440,name:a[3],text:a.slice(4).join('|'),t:Date.now()};notePos(a.slice(4).join('|'),a[3],1);renderPosts()}
+async function loadBoard(){try{const l=DEMO?demoPosts():await (await fetch('api/board')).json();l.forEach(p=>{if(!posts[p.id])posts[p.id]=Object.assign(p,{t:Date.now()-(p.ageMin||0)*60000});notePos(p.text,p.name,1)});renderPosts()}catch(e){}}
+function fmtDur(m){return m>=1440?Math.round(m/1440)+' d':m>=60?Math.round(m/60)+' h':m+' min'}
+function renderPosts(){const l=Object.values(posts).sort((a,b)=>(b.pinned-a.pinned)||(b.t-a.t));
+ $('#posts').innerHTML=l.length?l.map(p=>'<div class="post'+(p.pinned?' pin':'')+'"><div class="h"><span>'+(p.pinned?'📌 ':'')+'<b>'+esc(p.name||'?')+'</b> · '+new Date(p.t).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</span><span>läuft ab in '+fmtDur(p.ttlMin)+'</span></div><div class="tx">'+esc(p.text)+'</div></div>').join(''):'<p class="muted">Noch keine Aushänge.</p>'}
+$('#bsend').onclick=()=>{let t=$('#btext').value.trim().replace(/\s*\n\s*/g,' ');if(!t)return;
+ if(!name){name=(prompt('Dein Name (sichtbar für alle):')||'').trim().replace(/[<>|\s]+/g,'_').slice(0,20);if(!name)return;localStorage.setItem('dar-name',name);who()}
+const id=[...crypto.getRandomValues(new Uint8Array(4))].map(x=>x.toString(16).padStart(2,'0')).join('');
+ const line=id+'|'+($('#bpin').checked?'P':'-')+'|'+$('#bttl').value+'|'+name+'|'+t;if(enc.encode(line).length>220)return alert('Aushang zu lang');
+ if(raw(line,false,'b')!==false){addPost(line);$('#btext').value='';$('#bpin').checked=false}};
+/* ---------- Karte ---------- */
+const MAPS={},cv=$('#cv'),cx=cv.getContext('2d');let M=null,view=null,marks={},me=JSON.parse(localStorage.getItem('dar-me')||'null');
+function setMe(la,lo){me=[la,lo];localStorage.setItem('dar-me',JSON.stringify(me));drawMap()}
+function notePos(t,who,brett){const m=String(t).match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);if(!m)return;let n=who;
+ if(!n){const k=String(t).match(/^<([^>]{1,32})>/);n=k?k[1]:'?'}const la=+m[1],lo=+m[2];if(la<47||la>56||lo<5||lo>16)return;
+ marks[(brett?'b:':'c:')+n]={la,lo,n,brett:!!brett,t:Date.now(),txt:String(t).replace(/^<[^>]*>\s*/,'').slice(0,60)};if(M)drawMap()}
+async function getMap(k){if(MAPS[k])return MAPS[k];let r=await fetch('map/'+k+'.json').catch(()=>null);let d;
+ if(r&&r.ok&&(r.headers.get('content-type')||'').includes('json'))d=await r.json();else{r=await fetch('map/'+k+'.json.gz');d=JSON.parse(await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text())}
+ d.l.forEach(l=>{for(let i=3;i<l.length;i+=2){l[i]+=l[i-2];l[i+1]+=l[i-1]}});return MAPS[k]=d}
+async function loadMap(k){k=k||$('#mapsel').value;try{$('#mapinfo').textContent='Karte wird geladen …';M=await getMap(k);fit();if(DEMO&&me&&k=='ahrtal'){view.la=me[0];view.lo=me[1];view.s=12000;drawMap()}$('#mapinfo').textContent=M.name+' · '+M.l.length+' Linien · Positionen aus Nachrichten: '+Object.keys(marks).length}catch(e){$('#mapinfo').textContent='Karte nicht verfügbar: '+e.message}}
+function size(){const r=$('#mapwrap').getBoundingClientRect(),d=devicePixelRatio||1;cv.width=r.width*d;cv.height=r.height*d;cx.setTransform(d,0,0,d,0,0);return r}
+function fit(){const r=size(),b=M.view||M.bbox,k=Math.cos((b[1]+b[3])/2*Math.PI/180);const s=Math.min(r.width/((b[2]-b[0])*k),r.height/(b[3]-b[1]));view={lo:(b[0]+b[2])/2,la:(b[1]+b[3])/2,s:s*0.95,k};drawMap()}
+function P(lo,la){const r=cv.width/(devicePixelRatio||1),h=cv.height/(devicePixelRatio||1);return[r/2+(lo-view.lo)*view.k*view.s,h/2-(la-view.la)*view.s]}
+const ST={wd:['#163a26',0,1],v:['#3b3a1a',0,1],wa:['#1f4f74',0,1],b:['#3a4651',0,1],s:['#3d7fb0',1],w:['#4da3e0',3],f:['#54606a',.6],r:['#8a97a2',1],rw:['#b08ad0',1.4],h:['#e8c07a',2.2]};
+const ORDER=['wd','v','wa','b','s','w','f','r','rw','h'];const PC={apo:'#ff7d8f',med:'#ff7d8f',h2o:'#4dd2ff',fw:'#ff5a3c',pol:'#7aa0ff',sh:'#c9b38a',shop:'#d6a0ff',amt:'#cccccc',wc:'#888',sch:'#999'};
+function drawMap(){if(!M||!view||!cv.offsetParent)return;const W=cv.width/(devicePixelRatio||1),H=cv.height/(devicePixelRatio||1);cx.fillStyle='#0d1a22';cx.fillRect(0,0,W,H);
+ const z=view.s/1e5,ppd=view.s;// Pixel pro Grad
+ for(const o of ORDER){const st=ST[o];if((o=='f'||o=='b')&&ppd<20000)continue;if(o=='r'&&ppd<6000)continue;cx.beginPath();
+  for(const l of M.l){if(l[0]!==o)continue;let [x,y]=P(l[1]/1e5,l[2]/1e5);cx.moveTo(x,y);for(let i=3;i<l.length;i+=2){[x,y]=P(l[i]/1e5,l[i+1]/1e5);cx.lineTo(x,y)}if(!st[1])cx.closePath()}
+  if(st[1]){cx.strokeStyle=st[0];cx.lineWidth=st[1]*Math.max(1,Math.min(2.5,ppd/15000));cx.stroke()}else{cx.fillStyle=st[0];cx.fill()}}
+ cx.font='12px system-ui';cx.textAlign='center';
+ for(const p of M.p){const [x,y]=P(p[2]/1e5,p[3]/1e5);if(x<-20||y<-20||x>W+20||y>H+20)continue;
+  if(p[0].startsWith('pl:')){const big=/town|city/.test(p[0]),vil=/village|suburb/.test(p[0]);if(!big&&!(vil&&ppd>=6000)&&ppd<20000)continue;cx.fillStyle=big?'#eaf2f7':'#b7c7d0';cx.font=(big?'bold 13px':'11px')+' system-ui';cx.fillText(p[1],x,y)}
+  else if(ppd>9000){cx.fillStyle=PC[p[0]]||'#aaa';cx.beginPath();cx.arc(x,y,3.5,0,7);cx.fill();if(ppd>25000&&p[1]){cx.font='10px system-ui';cx.fillStyle='#cdd';cx.fillText(p[1].slice(0,24),x,y-6)}}}
+ if(ppd<8000)for(const q of PLACES){const [x,y]=P(q[2],q[1]);cx.fillStyle='#b7d6b7';cx.font='11px system-ui';cx.beginPath();cx.arc(x,y,2.5,0,7);cx.fill();cx.fillText(q[0],x,y-6)}
+ const pin=(la,lo,c,label)=>{const [x,y]=P(lo,la);cx.fillStyle=c;cx.strokeStyle='#000';cx.lineWidth=1.5;cx.beginPath();cx.arc(x,y,7,0,7);cx.fill();cx.stroke();
+  cx.font='bold 12px system-ui';cx.textAlign='left';cx.lineWidth=3;cx.strokeStyle='#0d1a22';cx.strokeText(label,x+10,y+4);cx.fillStyle='#fff';cx.fillText(label,x+10,y+4);cx.textAlign='center'};
+ for(const m of Object.values(marks))pin(m.la,m.lo,m.brett?'#ffb84d':'#6ab0e0',(m.brett?'📌 ':'')+m.n);
+ if(me)pin(me[0],me[1],'#9ee576','Ich')}
+let pts=new Map(),last=null;
+cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY])};
+cv.onpointermove=e=>{if(!pts.has(e.pointerId)||!view)return;const o=pts.get(e.pointerId);
+ if(pts.size==1){view.lo-=(e.clientX-o[0])/(view.k*view.s);view.la+=(e.clientY-o[1])/view.s}
+ else if(pts.size==2){const [a,b]=[...pts.values()];const d0=Math.hypot(a[0]-b[0],a[1]-b[1]);pts.set(e.pointerId,[e.clientX,e.clientY]);const [c,d]=[...pts.values()];const d1=Math.hypot(c[0]-d[0],c[1]-d[1]);if(d0>0)zoom(d1/d0);return}
+ pts.set(e.pointerId,[e.clientX,e.clientY]);drawMap()};
+cv.onpointerup=cv.onpointercancel=e=>pts.delete(e.pointerId);
+cv.onwheel=e=>{e.preventDefault();zoom(e.deltaY<0?1.25:0.8)};
+function zoom(f){if(!view)return;view.s=Math.max(2000,Math.min(400000,view.s*f));drawMap()}
+$('#zin').onclick=()=>zoom(1.5);$('#zout').onclick=()=>zoom(1/1.5);$('#mapfit').onclick=()=>M&&fit();
+$('#mapme').onclick=()=>{if(!me)return alert('Noch kein Standort – unter „Standort“ GPS holen oder Ort wählen.');view.la=me[0];view.lo=me[1];view.s=Math.max(view.s,30000);drawMap()};
+$('#mapsel').onchange=()=>loadMap();addEventListener('resize',()=>{if(M&&view){size();drawMap()}});
+function demoPosts(){return[{id:'a1b2c3d4',pinned:true,name:'Feuerwehr_Heimersheim',text:'Trinkwasser-Ausgabe am Bürgerhaus Heimersheim 14–17 Uhr (50.5426,7.1761). Kanister mitbringen.',ageMin:95,ttlMin:1350},
+ {id:'b2c3d4e5',pinned:false,name:'Anna',text:'Brücke Bachstraße gesperrt, Umweg über Lohrsdorf.',ageMin:40,ttlMin:1400},
+ {id:'c3d4e5f6',pinned:true,name:'Praxis_Dr_M',text:'Apotheke Bad Neuenahr Notdienst geöffnet bis 20 Uhr @ (50.5449,7.1377)',ageMin:180,ttlMin:600},
+ {id:'d4e5f6a7',pinned:false,name:'Jonas',text:'Suche Stromaggregat für Pumpe, Heppingen. Tel. über Chat.',ageMin:12,ttlMin:4300}]}
+who();connect();if(DEMO){loadBoard();if(!me)me=[50.5440,7.1700]}
+const h0=location.hash.slice(1);if(h0){const b=document.querySelector('nav button[data-tab="'+h0+'"]');if(b)b.click()}
 </script></body></html>
