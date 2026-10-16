@@ -6,6 +6,8 @@
 
 Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https://github.com/sudomesh/disaster-radio)** mit der Ahrtal-Weboberfläche aus **[Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh)** – aber **ohne MeshCore**: Funk und Routing laufen über das ursprüngliche disaster-radio-Konzept (Layer1 + LoRaLayer2).
 
+Verwandte Repositorys: [Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh) (Hauptprojekt, MeshCore 1.18 mit großer MeshAhrtal-Oberfläche) · [Pietwars/DisAHRsterRadio-MeshCore](https://github.com/Pietwars/DisAHRsterRadio-MeshCore) (dieselbe Oberfläche wie hier, aber auf MeshCore 1.18 – kompatibel zu MeshCore-Geräten).
+
 > ⚠️ **Wichtig:** DisAHRsterRadio ist **kein zertifiziertes Notrufsystem** und ersetzt keine Behörden-Kommunikation. In Lebensgefahr immer **112** wählen, wenn irgendwie möglich.
 
 ## Ehrlicher Stand (Oktober 2026)
