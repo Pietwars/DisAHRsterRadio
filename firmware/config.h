@@ -34,6 +34,7 @@
 #define LORA_TCXO 1.8f
 #define OLED_SDA 18
 #define OLED_SCL 17
+#undef OLED_RST
 #define OLED_RST NOT_A_PIN
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
@@ -55,6 +56,7 @@
 #define LORA_BUSY RADIOLIB_NC
 #define OLED_SDA 21
 #define OLED_SCL 22
+#undef OLED_RST
 #define OLED_RST NOT_A_PIN
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
