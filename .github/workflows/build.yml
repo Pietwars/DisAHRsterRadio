@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env: [t3s3-sx1262, t3-v161-sx1276, heltec-v2-sx1276]
+        env: [t3s3-sx1262, t3-v161-sx1276, heltec-v2-sx1276, heltec-v2-sx1276-wifi11]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

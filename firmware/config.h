@@ -83,9 +83,16 @@
 #define OLED_HEIGHT 64
 #define VEXT_PIN 21   // Vext (OLED-Versorgung), LOW = an
 // Brownout-Gegenmassnahmen: reduzierte WLAN-Sendeleistung, laengere Startstaffelung
+#ifdef HELTEC_WIFI_11DBM
+#define WIFI_TX_POWER WIFI_POWER_11dBm
+#else
 #define WIFI_TX_POWER WIFI_POWER_8_5dBm
+#endif
 #undef STARTUP_STAGGER_MS
 #define STARTUP_STAGGER_MS 600
+#define DISABLE_BROWNOUT      // Brownout-Detektor frueh abschalten
+#define WIFI_LATE             // WLAN erst nach LoRa/Display starten
+#define WIFI_LATE_DELAY_MS 2000
 #endif
 
 #ifndef BOARD_NAME

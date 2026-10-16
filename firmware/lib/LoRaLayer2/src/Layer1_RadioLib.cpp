@@ -2,6 +2,7 @@
 
 static volatile bool _dioFlag = false;
 static volatile bool _transmitFlag = false;
+uint32_t Layer1Class::_holdUntil = 0;
 
 Layer1Class::Layer1Class(L1Radio *lora, int mode, int cs, int reset, int dio, uint8_t sf,
                          float frequency, int power, float bandwidth, float tcxo)
@@ -60,6 +61,7 @@ int Layer1Class::sendPacket(char *data, size_t len) {
 
 int Layer1Class::transmit() {
     if (_transmitFlag) return 0; // laufende Aussendung abwarten
+    if ((int32_t)(millis() - _holdUntil) < 0) return 0; // Sendepause (WLAN-Start)
     BufferEntry entry = txBuffer->read();
     if (entry.length > 0) sendPacket(entry.data, entry.length);
     return entry.length;

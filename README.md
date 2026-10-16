@@ -26,7 +26,7 @@ Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https
 | `t3-v161-sx1276` | LILYGO T3 V1.6.1 | SX1276 |
 | `heltec-v2-sx1276` | Heltec WiFi LoRa 32 V2 | SX1276 |
 
-Heltec V2: WLAN-Sendeleistung auf 8,5 dBm reduziert und gestaffelter Start (600 ms zwischen WLAN und LoRa), weil an diesem Board Brownouts beobachtet wurden.
+Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nach LoRa/Display), WLAN-Sendeleistung 8,5 dBm (Variante `heltec-v2-sx1276-wifi11` mit 11 dBm), softAP auf Kanal 1 mit Prüfung und Neuversuch alle 5 s, LoRa-Sendepause während des WLAN-Starts, Startmarken `[BOOT …]` und alle 30 s WLAN-Name/Passwort seriell und auf dem OLED.
 
 ## Was gegenüber disaster-radio modernisiert wurde
 

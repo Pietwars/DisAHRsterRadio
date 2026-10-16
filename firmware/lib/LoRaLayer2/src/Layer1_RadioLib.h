@@ -29,6 +29,9 @@ public:
     float loraFrequency() { return _loraFrequency; }
     int txPower() { return _txPower; }
     void setTxPower(int p);
+    // LoRa-Senden fuer ms Millisekunden zurueckhalten (z. B. waehrend WLAN-Start)
+    static void holdTx(uint32_t ms) { _holdUntil = millis() + ms; }
+    static uint32_t _holdUntil;
     void setSpreadingFactor(uint8_t sf);
     packetBuffer *txBuffer;
     packetBuffer *rxBuffer;

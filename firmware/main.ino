@@ -15,6 +15,10 @@
 #include <SSD1306Wire.h>
 #endif
 #include "config.h"
+#ifdef DISABLE_BROWNOUT
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
+#endif
 
 
 #include <Layer1_RadioLib.h>
@@ -104,6 +108,26 @@ int routes = 0;
 char nodeAddress[ADDR_LENGTH*2 + 1] = {'\0'};
 char ssid[100] = {'\0'};
 String apPassword;
+bool apOk = false;
+uint32_t lastApRetry = 0, lastApPrint = 0;
+
+void bootMark(const char *step)
+{
+  Serial.printf("[BOOT %lu ms] %s\n", (unsigned long)millis(), step);
+  Serial.flush();
+}
+
+bool startSoftAP()
+{
+  bool ok = WiFi.softAP(ssid, apPassword.c_str(), 1, false, 4);
+#ifdef WIFI_TX_POWER
+  WiFi.setTxPower(WIFI_TX_POWER);
+#endif
+  Serial.printf("[WLAN] softAP(\"%s\", Kanal 1) -> %s, TX-Leistung %d (0,25 dBm)\n", ssid, ok ? "OK" : "FEHLER",
+                (int)WiFi.getTxPower());
+  Serial.flush();
+  return ok;
+}
 IPAddress ip;
 
 bool sdInitialized = false;
@@ -164,12 +188,15 @@ void setupWiFi()
     wp.end();
 
     // start the AP
+    Layer1Class::holdTx(8000); // waehrend WLAN-Start nicht per LoRa senden (Stromspitzen)
+    bootMark("WiFi.mode(AP)");
     WiFi.mode(WIFI_AP);
-    WiFi.setHostname(HOST_NAME);
-    WiFi.softAP(ssid, apPassword.c_str(), 1, false, 4);
 #ifdef WIFI_TX_POWER
     WiFi.setTxPower(WIFI_TX_POWER); // Brownout-Schutz (z. B. Heltec V2)
+    bootMark("WiFi.setTxPower");
 #endif
+    WiFi.setHostname(HOST_NAME);
+    apOk = startSoftAP();
 
     ip = WiFi.localIP();
     ip = WiFi.softAPIP();
@@ -559,49 +586,62 @@ void setupBLE(void)
 void setupBLE(void) { Serial.println("* BLE in diesem Build deaktiviert"); }
 #endif
 
+void setupNetwork()
+{
+  if (useBLE) { setupBLE(); return; }
+  bootMark("WLAN");
+  setupWiFi();
+  delay(STARTUP_STAGGER_MS);
+  bootMark("mDNS");
+  setupMDNS();
+  bootMark("HTTP");
+  setupHTTPSever();
+  bootMark("Telnet/WebSocket");
+  setupTelnet();
+  setupWebSocket();
+}
+
 void setup()
 {
+#ifdef DISABLE_BROWNOUT
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); // Brownout-Detektor aus (Heltec V2: Reset-Schleifen)
+#endif
   Serial.begin(115200);
   delay(200);
+  bootMark("Serial");
 
   // Get saved settings
   getSettings();
+  bootMark("Einstellungen");
 
   setCpuFrequencyMhz(CLOCK_SPEED); //Set CPU clock in config.h
   getCpuFrequencyMhz(); //Get CPU clock
 
   Serial.printf("\nDisAHRsterRadio %s (%s) - basiert auf sudomesh/disaster-radio\n", DAR_VERSION, BOARD_NAME);
   delay(STARTUP_STAGGER_MS); // gestaffelter Start: Spannung stabilisieren lassen
-  if (!useBLE)
-  {
-  setupWiFi();
-  delay(STARTUP_STAGGER_MS);
-  setupMDNS();
-  }
+#ifndef WIFI_LATE
+  setupNetwork();
+#endif
+  bootMark("SD");
   setupSD();
+  bootMark("LittleFS");
   setupFS();
-  if (!useBLE)
-  {
-  setupHTTPSever();
-  }
-
   setupHistory();
   setupSerial();
-  if (!useBLE)
-  {
-  setupTelnet();
-  setupWebSocket();
-  }
-  else
-  {
-  setupBLE();
-  }
   board = new BoardClient(fsInitialized ? (fs::FS *)&LittleFS : NULL);
   radio->connect(board);
   delay(STARTUP_STAGGER_MS);
+  bootMark("LoRa");
   setupLoRa();
+  bootMark("Display");
   setupDisplay();
   setupGPS();
+#ifdef WIFI_LATE
+  // WLAN zuletzt, mit Pause nach dem Funkmodul (Stromspitzen entzerren)
+  delay(WIFI_LATE_DELAY_MS);
+  setupNetwork();
+#endif
+  bootMark("fertig");
 
   internal_clients = radio->clients.size();
 
@@ -620,6 +660,37 @@ void loop()
       routes = new_routes;
       Serial.printf("--> clients=%d routes=%d\n", clients, routes);
       drawStatusBar();
+    }
+  }
+  // WLAN-AP pruefen/neu starten und Zugangsdaten regelmaessig ausgeben
+  if (!useBLE && ssid[0] && WiFi.getMode() & WIFI_AP)
+  {
+    if (!apOk && millis() - lastApRetry > 5000)
+    {
+      lastApRetry = millis();
+      Layer1Class::holdTx(3000);
+      apOk = startSoftAP();
+    }
+    if (millis() - lastApPrint > 30000)
+    {
+      lastApPrint = millis();
+      Serial.printf("[WLAN] %s | SSID: %s | Passwort: %s | http://%s | Clients: %d\n", apOk ? "AP aktiv" : "AP FEHLER", ssid,
+                    apPassword.c_str(), WiFi.softAPIP().toString().c_str(), WiFi.softAPgetStationNum());
+#ifdef HAS_OLED
+      if (displayInitialized && clients == 0)
+      {
+        display.setColor(BLACK);
+        display.fillRect(0, STATUS_BAR_HEIGHT + 1, OLED_WIDTH, OLED_HEIGHT - STATUS_BAR_HEIGHT - 1);
+        display.setColor(WHITE);
+        display.setFont(ArialMT_Plain_10);
+        display.setTextAlignment(TEXT_ALIGN_LEFT);
+        display.drawString(0, 16, apOk ? "WLAN:" : "WLAN FEHLER:");
+        display.drawString(0, 28, ssid);
+        display.drawString(0, 40, String("PW: ") + apPassword);
+        display.drawString(0, 52, WiFi.softAPIP().toString());
+        display.display();
+      }
+#endif
     }
   }
   // reconnect only in WiFi client mode 
