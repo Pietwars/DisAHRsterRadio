@@ -1,191 +1,79 @@
-[disaster.radio](https://disaster.radio) is currently not actively developed and [seeks a new maintainer](https://github.com/sudomesh/disaster-radio/issues/110)
+# DisAHRsterRadio
 
-It is a work-in-progress long-range, low-bandwidth wireless disaster recovery mesh network powered by the sun. 
+![DisAHRsterRadio Ahrtal](docs/images/disahrsterradio-header.jpg)
 
-[![Build Status](https://travis-ci.org/sudomesh/disaster-radio.svg?branch=master)](https://travis-ci.org/sudomesh/disaster-radio)  
+**Offline-Chat über LoRa-Mesh für das Ahrtal** – ein Gerät spannt ein eigenes WLAN auf, man verbindet sich mit dem Handy und schreibt im Browser. Die Nachrichten laufen per LoRa von Gerät zu Gerät weiter, ganz ohne Internet oder Mobilfunk.
 
-* [firmware/](./firmware) contains the main example code for ESP32 dev boards
-* [src/](./src) contains the disaster radio library code used by the firmware and simulator
-* [web/](./web) is the demo chat app served up by the disaster-radio
-* [hardware/](./hardware) is the kicad board layout and schematic
-* [enclosure/](./enclosure) are 3D models of the enclosure(s)
-* [android app](https://github.com/beegee-tokyo/disaster-radio-android) source code for [DisasterRadio BLE Chatbox](https://play.google.com/store/apps/details?id=tk.giesecke.disaster_radio&hl=en_US) Android Application
-* [mapping web app](https://github.com/sudomesh/disaster-radio-map) source code for mapping web-based appilcation
+Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https://github.com/sudomesh/disaster-radio)** mit der Ahrtal-Weboberfläche aus **[Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh)** – aber **ohne MeshCore**: Funk und Routing laufen über das ursprüngliche disaster-radio-Konzept (Layer1 + LoRaLayer2).
 
-## Table of contents
-- [Getting Started](#getting-started)
-- [Layout and Flow](#layout-and-flow)
-- [Hardware Connections](#hardware-connections)
-- [Initial Setup with PlatformIO](#initial-setup-with-platformio)
-    - [Building firmware](#building-firmware)
-    - [Flashing firmware](#flashing-firmware)
-        - [For dev boards](#for-dev-boards)
-- [Building Web App](#building-web-app)
-    - [Building and uploading SPIFFS image](#building-and-uploading-SPIFFS-image)
-- [Testing Firmware](#testing-firmware) 
-- [Adding Libraries](#adding-libraries)
-- [Creating Binary for Release](#creating-binary-for-release)
-- [License](#license)
+> ⚠️ **Wichtig:** DisAHRsterRadio ist **kein zertifiziertes Notrufsystem** und ersetzt keine Behörden-Kommunikation. In Lebensgefahr immer **112** wählen, wenn irgendwie möglich.
 
-# Getting Started
-The quickest way to get started with disaster.radio is to buy a <a href="https://www.aliexpress.com/item/4000396836096.html" target="_blank">preinstalled device</a> or
-* Download the [latest release](https://github.com/sudomesh/disaster-radio/releases)
-* Unzip the `disaster-radio-0.X.X.zip` file
-* Follow the included instructions for flashing it to your device
+## Ehrlicher Stand (Oktober 2026)
 
-If you would rather test the latest, cutting-edge developments, you can compile the firmware yourself by cloning this repo and following the [initial setup](#initial-setup-with-platformio) instructions.
+| Punkt | Stand |
+|---|---|
+| Firmware baut für alle 3 Boards | ✅ (lokal und per GitHub Actions) |
+| Auf echter Hardware getestet | ❌ **noch nicht** – weder Funk, WLAN noch Web-UI auf einem Gerät geprüft |
+| Funkverbindung zwischen zwei Geräten | ❓ ungetestet |
+| Kompatibel mit altem disaster-radio-Funk (915 MHz/US) | ❌ nein, EU868-Standard |
+| Kompatibel mit MeshCore/DisasterMesh-Geräten | ❌ nein, anderes Funkprotokoll |
 
-# Layout and Flow
-The Disaster Radio firmware is made up of a single "server" and a number of "clients", as well as "middleware" that sits between the clients and server. These are a"server" and "clients" in the logical, software sense, not a literal, networking sense.
- 
-Here are the modules currently implemented with descriptions of their purpose:
-- DisasterServer:  
-    - DisasterRadio: the main "server" that takes messages from clients and sends them to other clients
+## Unterstützte Boards
 
-- DisasterClient:  
-    - LoRaClient: interfaces with LoRaLayer2  
-    - WebSocketClient: WebSocket connections from the web app  
-    - StreamClient: for Arduino Stream, currently used for serial console  
-    - TCPClient: for a telnet-like server  
-    - HistoryRecord: records messages to SD card (or bounded queue in memory)  
-    - OLEDClient: displays messages on the screen (mostly for debugging purposes, but eventually I'd like to use this for a mobile Disaster Radio terminal of some kind)   
-    - GPSClient: proof-of-concept, interfaces with a serial GPS module to beacon your current location periodically  
+| PlatformIO-Env | Board | Funkchip |
+|---|---|---|
+| `t3s3-sx1262` | LILYGO T3-S3 (Hauptziel) | SX1262 (TCXO 1,8 V) |
+| `t3-v161-sx1276` | LILYGO T3 V1.6.1 | SX1276 |
+| `heltec-v2-sx1276` | Heltec WiFi LoRa 32 V2 | SX1276 |
 
-- DisasterMiddleware:  
-    - WelcomeMessage: (very simple, in main.cpp) shows a welcome message to clients when they connect
-    - HistoryReplay: shows history to clients when they connect
-    - Console: implements a simple console with chat (similar to the web app) plus some /commands (I went with a more IRC-like syntax but you could easily implement a getopt version)
-    
-- DisasterHistory:
-    - HistorySD: records history to SD card
-    - HistoryMemory: records history to a bounded queue in memory (default limit 10 messages)
+Heltec V2: WLAN-Sendeleistung auf 8,5 dBm reduziert und gestaffelter Start (600 ms zwischen WLAN und LoRa), weil an diesem Board Brownouts beobachtet wurden.
 
-The server and clients communicate with each other using "datagrams" that include a destination address, a message type, and a message. Read more about the disaster radio networking stack on our wiki, https://github.com/sudomesh/disaster-radio/wiki/Layered-Model.
+## Was gegenüber disaster-radio modernisiert wurde
 
-# Hardware Connections  
+- PlatformIO mit **pioarduino** (aktuelles Arduino-ESP32 3.3.x / ESP-IDF 5.5) statt altem Git-Stand der espressif32-Plattform
+- **RadioLib 7.x** statt sandeepmistry/arduino-LoRa bzw. uraltem RadioLib-Commit; eine gemeinsame `Layer1_RadioLib` für SX1262 und SX1276 (SX1262 jetzt mit BUSY-Pin, TCXO, DIO2-HF-Schalter)
+- **LoRaLayer2** (Routing von disaster-radio) liegt angepasst in `firmware/lib/LoRaLayer2` (Sende-/Empfangsleistung und SF zur Laufzeit, Konfigurationsausgabe auch für RadioLib)
+- **ESP32Async/ESPAsyncWebServer + AsyncTCP** (gepflegte Forks), **LittleFS** statt SPIFFS, AsyncSDServer entfernt (SD über ESPAsyncWebServer)
+- **EU868-Standard:** 869,525 MHz, 125 kHz, SF9, 14 dBm (Duty-Cycle-Begrenzung von LoRaLayer2 aktiv)
+- WLAN-Zugangspunkt **`DisAHRsterRadio-XXXXXX`** mit **geräteindividuellem Zufallspasswort** (einmal erzeugt, im NVS gespeichert, beim Start seriell ausgegeben)
+- BLE-UART von disaster-radio ist vorerst deaktiviert (Bluedroid-API passt nicht zu Arduino-ESP32 3.x auf dem S3; Build-Flag `HAS_BLE`)
 
-For supported development boards see the [Devices & Hardware](https://github.com/sudomesh/disaster-radio/wiki/Devices--&-Hardware) wiki page.  
+## Weboberfläche (MeshAhrtal)
 
-The pinouts for supported boards can be found in [firmware/esp32/config.h](https://github.com/sudomesh/disaster-radio/blob/master/firmware/esp32/config.h).  
+![Weboberfläche](docs/images/dar-ui.png)
 
-DIO0 sends an interrupt from the LoRa transceiver upon Tx/Rx Ready on the radio.   
-Chip selects can be used to explicitly switch between the LoRa tranceiver and the SD card; however, the SD card should be enabled by default, as the LoRa interrupt appears to handle enabling the transceiver (note: this still needs to be thoroughly tested, what happens if you receive an interrupt while loading from the SD?).  
+- Chat an alle (disaster-radio-WebSocket `/ws`, Format `<ID 2 Byte>c|<Name> Text`, Zustellbestätigung ✓ = vom Gerät angenommen, *nicht* beim Empfänger)
+- Schnellmeldungen (Trinkwasser, Strom, Medikamente, Verletzt, Evakuierung, „Mir geht es gut“, Hilfe-Angebote)
+- Standort: GPS des Telefons (funktioniert im Browser oft nur über HTTPS) oder Auswahl aus der Ortsliste Ahrtal (Ahrweiler … Sinzig)
+- Geräteinfo über `GET /api/info` (JSON)
+- Demo ohne Gerät: `web/static/index.html?demo=1` lokal öffnen
 
-# Initial Setup with PlatformIO
+Die MeshCore-spezifischen Funktionen aus DisasterMesh (Kanäle, Direktnachrichten, Schwarzes Brett, Karten, POIs, Admin) sind **nicht** übernommen.
 
-```
-pip install -U platformio
+## Erste Schritte
+
+```bash
+pip install platformio
+cd firmware
+pio run -e t3s3-sx1262 -t upload      # Firmware
+pio run -e t3s3-sx1262 -t uploadfs    # Weboberfläche (LittleFS)
+pio device monitor                     # zeigt WLAN-Name und Passwort
 ```
 
-Edit `platformio.ini` to suit your needs. If you are flashing a ESP32 LILY TTGO board then you will probably not have to edit anything in `platformio.ini` but make sure `upload_port` is set to the correct device which may vary depending on your operating system and which other devices you have connected.
+Dann mit dem WLAN `DisAHRsterRadio-XXXXXX` verbinden und `http://192.168.4.1` öffnen (oder `http://disahrster.local`). Seriell/Telnet (Port 23) gibt es weiterhin die disaster-radio-Konsole.
 
-## Building firmware
+## Bekannte Grenzen / offene Arbeit
 
-To test that the firmware is compiling correctly without flashing it to a device, run
-```
-pio run
-```
+- Hardwaretest auf allen drei Boards (Funk zwischen zwei Geräten, Reichweite, Stromaufnahme, Heltec-Brownout)
+- Pinbelegung T3-S3 und T3 V1.6.1 nach Datenblatt/LILYGO-Beispielen gesetzt, nicht gemessen
+- Keine Verschlüsselung/Signatur der Nachrichten (alle mit gleicher Frequenz können mitlesen und Namen fälschen)
+- Nachrichtenlänge max. ca. 220 Byte; kein Direktchat, keine Kanäle
+- Einstellung `loraFrq` ist ganzzahlig (869 = 869,525 MHz)
+- OLED-, GPS-, SD- und History-Code von disaster-radio übernommen, ungetestet
 
-This will compile all libraries and main firmware files. The resulting binary is stored as `.pio/build/ttgo-lora32-v1/firmware.bin`
+## Lizenz und Danksagung
 
-## Flashing firmware
-
-### For dev boards
-
-Connect your computer to the board using a usb cable,
-
-In `platformio.ini` make sure `upload_port`, `upload_speed`, etc are correct for your device.
-
-Then run:
-
-```
-pio run -t upload
-```
- 
-By default, PlatformIO builds and flashes firmware for the LILY's ESP32 TTGO V2 dev board. If you would like to build for another supported board, select the corresponding build environment. For example to build and flash the firmware and file system for the ESP32 TTG0 V1 board, use the following, 
-
-```
-pio run -e ttgo-lora32-v1 -t upload -t uploadfs
-
-```
-
-## Developing firmware
-
-Some useful hints for developing this firmware using platformio are included here,
-* It may be a good idea to delete the libdeps folder prior to rebuilding, as old, out-dated libraries could case conflits. To do this, `rm -rf .pio/libdeps`.
-* If you would like to make changes to a specific library, such as LoRaLayer2, you can clone the library into the `firmware/lib` folder that is created after running `pio run` and then comment it out or remove it from the `lib_deps` list in the `platformio.ini` file.
-
-# Building Web App
-
-First, build the web app using npm, instructions for can be found in [web/README.md](https://github.com/sudomesh/disaster-radio/tree/master/web#setup).
-
-If you have trouble building the web app with npm, you can download a pre-built version of web app as part of the [latest release](https://github.com/sudomesh/disaster-radio/releases). Then, copy the files in `web/static/` from the zipped release to the `web/static/` directory in the cloned repo.
-
-
-## Building and uploading SPIFFS image
-
-Next, build the binary for the SPIFFS and upload it to your board.
-
-To only build:
-
-```
-pio run -t buildfs
-```
-
-To build and upload:
-
-```
-pio run -t uploadfs
-```
-
-If using an SD card, copy the contents of `web/static/` to the root of a fat32 formatted SD card, then insert the SD card.
-
-# Testing Firmware  
-Once the firmware and SPIFFS image has been successfully flashed, you can test it by logging into the `disaster.radio <node-address>` wireless network and navigating to http://192.168.4.1 in a browser to access the demo chat app.  
-
-You can also try connecting to the device via serial or telnet with commands like,  
-```
-pio device monitor
-```
-or
-```
-telnet 192.168.4.1
-```
-
-After pressing enter once, you should be greeted with a banner and presented with a prompt to enter a nick or send an anonymous message,
-```
-     ___              __                            ___    
- ___/ (_)__ ___ ____ / /____ ____      _______ ____/ (_)__ 
-/ _  / (_-</ _ `(_-</ __/ -_) __/ _   / __/ _ `/ _  / / _ \
-\_,_/_/___/\_,_/___/\__/\__/_/   (_) /_/  \_,_/\_,_/_/\___/
-v1.0.0-rc.2
-LoRa transceiver connected
-Local address of your node is 1d69bd4c
-Type '/join NICKNAME' to join the chat, or '/help' for more commands.
-< > 
-```
-
-See [firmware/README.md](https://github.com/sudomesh/disaster-radio/tree/master/firmware) for more debugging information.
-
-# Adding Libraries
-
-If you're including new libraries in the firmware, for PlatformIO, you wil need to add them to `platformio.ini` under `lib_deps`.
-
-# Creating Binary for Release
-
-A full binary image can be created by reading the flash contents of a ESP32 that is flashed with the latest release of the firmware.
-To do this, run the following command,
-```
-esptool.py -p /dev/ttyUSB0 -b 921600 read_flash 0 0x400000 esp_flash.bin
-```
-
-This can then be flashed to a new device like so,
-```
-esptool.py -p /dev/ttyUSB0 --baud 460800 write_flash 0x00000 esp_flash.bin
-```
-
-# License
-
-* `firmware/`: Dual licensed under both GPLv3 and AGPLv3
-* `web/`: AGPLv3
-
+- Grundlage: [sudomesh/disaster-radio](https://github.com/sudomesh/disaster-radio) und [sudomesh/LoRaLayer2](https://github.com/sudomesh/LoRaLayer2) – vielen Dank an Sudo Mesh und alle Beteiligten. Git-Historie von disaster-radio ist erhalten, Original-README: [README.upstream.md](README.upstream.md).
+- `firmware/`: GPLv3 und AGPLv3 (dual, wie upstream) – siehe `LICENSE-GPL-3.0.txt`, `LICENSE-AGPL-3.0.txt`
+- `web/`: AGPLv3 (wie upstream). Die neue Ahrtal-Oberfläche stammt vom Autor aus DisasterMesh (dort MIT) und wird hier unter AGPLv3 veröffentlicht – MIT ist damit kompatibel.
+- Kopfbild: aus [Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh).

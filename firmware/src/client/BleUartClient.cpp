@@ -1,3 +1,4 @@
+#ifdef HAS_BLE
 #include "BleUartClient.h"
 #include "settings/settings.h"
 
@@ -329,3 +330,5 @@ void BleUartClient::init()
   pAdvertising->addServiceUUID(UART_UUID);
   pAdvertising->start();
 }
+
+#endif

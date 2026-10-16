@@ -1,123 +1,103 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// secrets in a separate file so we don't accidentally commit credentials
+// Zugangsdaten fuer optionalen WLAN-Client-Modus (nicht committen)
 #if __has_include("secrets.h")
 #include "secrets.h"
 #endif
 
+#define DAR_VERSION "0.1.0-dev"
 #define CLOCK_SPEED 240
 
-#ifdef TTGO_LORA_V1
+// EU868 Standard: 869.525 MHz (Teilband g3, 10 % Duty-Cycle), 125 kHz, SF9, 14 dBm
+#define LORA_DEFAULT_FREQ_MHZ 869.525f
+
+#ifndef STARTUP_STAGGER_MS
+#define STARTUP_STAGGER_MS 150
+#endif
+
+#ifndef LORA_TCXO
+#define LORA_TCXO 0.0f
+#endif
+
+/* ---------- LILYGO T3-S3 (SX1262) ---------- */
+#ifdef LILYGO_T3S3_SX1262
+#define BOARD_NAME "LILYGO T3-S3 SX1262"
+#define LORA_SCK 5
+#define LORA_MISO 3
+#define LORA_MOSI 6
+#define LORA_CS 7
+#define LORA_RST 8
+#define LORA_IRQ 33   // DIO1
+#define LORA_BUSY 34
+#undef LORA_TCXO
+#define LORA_TCXO 1.8f
+#define OLED_SDA 18
+#define OLED_SCL 17
+#define OLED_RST NOT_A_PIN
+#define OLED_WIDTH 128
+#define OLED_HEIGHT 64
+#define SD_SCK 14
+#define SD_MISO 2
+#define SD_MOSI 11
+#define SD_CS 13
+#endif
+
+/* ---------- LILYGO T3 V1.6.1 (SX1276) ---------- */
+#ifdef LILYGO_T3_V161
+#define BOARD_NAME "LILYGO T3 V1.6.1 SX1276"
 #define LORA_SCK 5
 #define LORA_MISO 19
 #define LORA_MOSI 27
 #define LORA_CS 18
-#define LORA_RST 14
-#define LORA_IRQ 26
-#define OLED_SDA 4
-#define OLED_SCL 15
-#define OLED_RST 16
+#define LORA_RST 23
+#define LORA_IRQ 26   // DIO0
+#define LORA_BUSY RADIOLIB_NC
+#define OLED_SDA 21
+#define OLED_SCL 22
+#define OLED_RST NOT_A_PIN
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
-#endif
-
-#ifdef TTGO_LORA_V2
 #define SD_SCK 14
 #define SD_MISO 2
 #define SD_MOSI 15
-#define OLED_SDA 21
-#define OLED_SCL 22
-#define OLED_RST NOT_A_PIN
-#define OLED_WIDTH 128
-#define OLED_HEIGHT 64
+#define SD_CS 13
 #endif
 
-#ifdef TTGO_TBEAM
-// #define LORA_SCK 14
-// #define LORA_MISO 2
-// #define LORA_MOSI 15
-// #define LORA_CS 18
-// #define LORA_RST 23
-// #define LORA_IRQ 26
-// #define SD_SCK 14
-// #define SD_MISO 2
-// #define SD_MOSI 15
-#define OLED_SDA 21
-#define OLED_SCL 22
-#define OLED_RST NOT_A_PIN
-#define OLED_WIDTH 128
-#define OLED_HEIGHT 64
-
-// https://github.com/cyberman54/ESP32-Paxcounter/blob/825520a20f1a1b7a9ac5e725484c2704bcb8117b/src/hal/ttgobeam.h
-#define GPS_SERIAL 9600, SERIAL_8N1, GPIO_NUM_12, GPIO_NUM_15
-
-#endif
-
-#ifdef HELTEC
-#define LORA_IRQ 26
-#define LORA_IO1 35
-#define LORA_IO2 34
+/* ---------- Heltec WiFi LoRa 32 V2 (SX1276) ---------- */
+#ifdef HELTEC_V2
+#define BOARD_NAME "Heltec WiFi LoRa 32 V2"
 #define LORA_SCK 5
 #define LORA_MISO 19
 #define LORA_MOSI 27
-#define LORA_RST 14
 #define LORA_CS 18
+#define LORA_RST 14
+#define LORA_IRQ 26   // DIO0
+#define LORA_BUSY RADIOLIB_NC
 #define OLED_SDA 4
 #define OLED_SCL 15
 #define OLED_RST 16
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
+#define VEXT_PIN 21   // Vext (OLED-Versorgung), LOW = an
+// Brownout-Gegenmassnahmen: reduzierte WLAN-Sendeleistung, laengere Startstaffelung
+#define WIFI_TX_POWER WIFI_POWER_8_5dBm
+#undef STARTUP_STAGGER_MS
+#define STARTUP_STAGGER_MS 600
 #endif
 
-#ifdef SPARKFUN
-#define LORA_IRQ 26
-#define LORA_IO1 33
-#define LORA_IO2 32
-#define LORA_SCK 14 SCK
-#define LORA_MISO 12
-#define LORA_MOSI 13
-#define LORA_RST NOT_A_PIN
-#define LORA_CS 16
-//#define OLED_SDA 21
-#define OLED_SCL 22
-#define OLED_RST NOT_A_PIN
-#define OLED_WIDTH 128
-#define OLED_HEIGHT 128
+#ifndef BOARD_NAME
+#error "Kein Board definiert (LILYGO_T3S3_SX1262, LILYGO_T3_V161, HELTEC_V2)"
 #endif
 
-#ifdef LOPY4
-// all necessary pins are defined in the arduino-esp32 variants
-// https://github.com/espressif/arduino-esp32/blob/master/variants/lopy4/pins_arduino.h
-// any additional board specifc settings should be added here
-#define LORA_IRQ 23
-#define LORA_CS 18
-// to add second LoRa module connect it to these pins and specific DUAL_LORA as a build flag
-#define LORA2_IRQ 26
-#define LORA2_RST NOT_A_PIN
-#define LORA2_CS 25
+#ifndef SD_CS
+#define SD_CS 13
 #endif
 
-#ifdef ESP32_V3
-
-#define LORA_IRQ 22
-#define LORA_CS 16
-#define LORA_IO1 26
-#define LORA_IO2 NOT_A_PIN
-#define LORA_RST NOT_A_PIN
-#define LORA_SCK 18
-#define LORA_MOSI 23
-#define LORA_MISO 19
-#define LORA_RXEN 17
-
-//comment all LORA2 lines and -DDUAL_LORA build flag to disable second module
-
-#define LORA2_CS 33
-#define LORA2_IRQ 35
-#define LORA2_RST NOT_A_PIN
-#define LORA2_IO1 27
-#define LORA2_IO2 NOT_A_PIN
-#define LORA2_RXEN 21
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#define VSPI_OR_FSPI FSPI
+#else
+#define VSPI_OR_FSPI VSPI
 #endif
 
 #endif

@@ -1,0 +1,36 @@
+name: Firmware-Build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [t3s3-sx1262, t3-v161-sx1276, heltec-v2-sx1276]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ matrix.env }}-${{ hashFiles('firmware/platformio.ini') }}
+      - run: pip install -U platformio
+      - name: Firmware bauen
+        working-directory: firmware
+        run: pio run -e ${{ matrix.env }}
+      - name: Dateisystem (Web-UI) bauen
+        working-directory: firmware
+        run: pio run -e ${{ matrix.env }} -t buildfs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.env }}
+          path: |
+            firmware/.pio/build/${{ matrix.env }}/firmware.bin
+            firmware/.pio/build/${{ matrix.env }}/bootloader.bin
+            firmware/.pio/build/${{ matrix.env }}/partitions.bin
+            firmware/.pio/build/${{ matrix.env }}/littlefs.bin

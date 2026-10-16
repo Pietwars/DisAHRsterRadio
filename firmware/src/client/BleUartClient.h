@@ -1,3 +1,4 @@
+#ifdef HAS_BLE
 #ifndef BLECLIENT_H
 #define BLECLIENT_H
 
@@ -33,5 +34,7 @@ public:
   static void init();
   static void startServer(void (*callback)(BleUartClient *));
 };
+
+#endif
 
 #endif

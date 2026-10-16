@@ -8,24 +8,16 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
-#include <AsyncSDServer.h>
+#include <Preferences.h>
 #include <SD.h>
-#include <SPIFFS.h>
+#include <LittleFS.h>
 #ifdef HAS_OLED
 #include <SSD1306Wire.h>
 #endif
 #include "config.h"
 
-#ifdef ARDUINO_LORA
-#include <Layer1_LoRa.h>
-#endif
 
-#ifdef RL_SX1276
-#include <Layer1_SX1276.h>
-#endif
-#ifdef RL_SX1262
-#include <Layer1_SX126x.h>
-#endif
+#include <Layer1_RadioLib.h>
 
 #include <LoRaLayer2.h>
 
@@ -51,48 +43,51 @@
 #include "DisasterHistory.h"
 #include "DisasterMiddleware.h"
 
-#define MDNS_NAME_PREFIX "disaster"
-#define HOST_NAME "disaster.radio"
-#define WIFI_AP_SSID_PREFIX "disaster.radio "
+#define MDNS_NAME_PREFIX "disahrster"
+#define HOST_NAME "disahrsterradio"
+#define WIFI_AP_SSID_PREFIX "DisAHRsterRadio-"
 
-#define INDEX_FILE "index.htm"
+#define INDEX_FILE "index.html"
 
 #ifdef HAS_OLED
 SSD1306Wire display(0x3c, OLED_SDA, OLED_SCL);
 #endif
 
+#ifdef SD_SCK
 SPIClass sd_card(HSPI);
+#else
+SPIClass sd_card(VSPI_OR_FSPI);
+#endif
 
-SPIClass SPI_1(SPI);
-SPIClass SPI_2(SPI);
 
 AsyncServer tcp_server(23);
 AsyncWebServer http_server(80);
 AsyncWebSocket ws_server("/ws");
 
+#ifdef HAS_BLE
 BleUartClient ble_client;
-
-#ifdef ARDUINO_LORA
-Layer1Class *Layer1 = new Layer1Class();
 #endif
 
 #ifdef RL_SX1276
-SX1276 lora = new Module(LORA_CS, LORA_IRQ, LORA_RST, RADIOLIB_NC);
+SX1276 lora = new Module(LORA_CS, LORA_IRQ, LORA_RST, LORA_BUSY);
   #ifdef DUAL_LORA
-  SX1276 lora2 = new Module(LORA2_CS, LORA2_IRQ, LORA2_RST, RADIOLIB_NC);
+  SX1276 lora2 = new Module(LORA2_CS, LORA2_IRQ, LORA2_RST, LORA2_BUSY);
   #endif
 #endif
 
 #ifdef RL_SX1262
-SX1262 lora = new Module(LORA_CS, LORA_IRQ, LORA_RST, RADIOLIB_NC);
+SX1262 lora = new Module(LORA_CS, LORA_IRQ, LORA_RST, LORA_BUSY);
   #ifdef DUAL_LORA
-  SX1262 lora2 = new Module(LORA2_CS, LORA2_IRQ, LORA2_RST, RADIOLIB_NC);
+  SX1262 lora2 = new Module(LORA2_CS, LORA2_IRQ, LORA2_RST, LORA2_BUSY);
   #endif
 #endif
 
 LL2Class *LL2;
 
 #include "settings/settings.h"
+
+// 869 (Standard) => 869.525 MHz, sonst ganzzahliger Wert aus den Einstellungen
+float loraFreqMHz() { return loraFrq == 869 ? LORA_DEFAULT_FREQ_MHZ : (float)loraFrq; }
 
 DisasterRadio *radio = new DisasterRadio();
 DisasterHistory *history = NULL;
@@ -106,10 +101,11 @@ int routes = 0;
 
 char nodeAddress[ADDR_LENGTH*2 + 1] = {'\0'};
 char ssid[100] = {'\0'};
+String apPassword;
 IPAddress ip;
 
 bool sdInitialized = false;
-bool spiffsInitialized = false;
+bool fsInitialized = false;
 bool displayInitialized = false;
 bool loraInitialized = false;
 
@@ -148,16 +144,35 @@ void setupWiFi()
   if (WiFi.status() != WL_CONNECTED)
   {
     // format full SSID with MAC address suffix
-    snprintf(ssid, sizeof(ssid), "%s%s", WIFI_AP_SSID_PREFIX, nodeAddress);
+    snprintf(ssid, sizeof(ssid), "%s%02X%02X%02X", WIFI_AP_SSID_PREFIX, mac[3], mac[4], mac[5]);
+
+    // geraeteindividuelles Zufallspasswort (einmal erzeugt, im NVS gespeichert)
+    Preferences wp;
+    wp.begin("dar-wifi", false);
+    apPassword = wp.getString("ap-pass", "");
+    if (apPassword.length() < 12)
+    {
+      uint8_t rnd[6];
+      esp_fill_random(rnd, sizeof(rnd));
+      char buf[13];
+      for (int i = 0; i < 6; i++) sprintf(buf + 2 * i, "%02x", rnd[i]);
+      apPassword = String(buf);
+      wp.putString("ap-pass", apPassword);
+    }
+    wp.end();
 
     // start the AP
     WiFi.mode(WIFI_AP);
     WiFi.setHostname(HOST_NAME);
-    WiFi.softAP(ssid);
+    WiFi.softAP(ssid, apPassword.c_str(), 1, false, 4);
+#ifdef WIFI_TX_POWER
+    WiFi.setTxPower(WIFI_TX_POWER); // Brownout-Schutz (z. B. Heltec V2)
+#endif
 
     ip = WiFi.localIP();
-    Serial.printf(" --> Started WiFi AP \"%s\", IP address: ", ssid);
-    Serial.println(ip);
+    ip = WiFi.softAPIP();
+    Serial.printf("\n==============================\nWLAN: %s\nPasswort: %s\nBrowser: http://%s\n==============================\n",
+                  ssid, apPassword.c_str(), ip.toString().c_str());
   }
 }
 
@@ -187,7 +202,7 @@ void setupSD()
 #ifdef SD_SCK
   Serial.println("* Initializing SD card...");
   sd_card.begin(SD_SCK, SD_MISO, SD_MOSI, -1);
-  if (SD.begin(13, sd_card))
+  if (SD.begin(SD_CS, sd_card))
   {
     sdInitialized = true;
   }
@@ -198,16 +213,16 @@ void setupSD()
 #endif
 }
 
-void setupSPIFFS()
+void setupFS()
 {
-  Serial.println("* Initializing SPIFFS...");
-  if (SPIFFS.begin())
+  Serial.println("* Initializing LittleFS...");
+  if (LittleFS.begin())
   {
-    spiffsInitialized = true;
+    fsInitialized = true;
   }
   else
   {
-    Serial.println(" --> SPIFFS initializtion failed");
+    Serial.println(" --> LittleFS initializtion failed");
   }
 }
 
@@ -227,17 +242,27 @@ void setupHTTPSever()
   if (sdInitialized && checkFileIsReadable(SD, "/" INDEX_FILE))
   {
     Serial.println(" --> Serving web application from SD card");
-    http_server.addHandler(new AsyncStaticSDWebHandler("/", SD, "/", "max-age=604800"));
+    http_server.serveStatic("/", SD, "/").setDefaultFile(INDEX_FILE).setCacheControl("max-age=600");
   }
-  else if (spiffsInitialized && checkFileIsReadable(SPIFFS, "/" INDEX_FILE))
+  else if (fsInitialized && checkFileIsReadable(LittleFS, "/" INDEX_FILE))
   {
-    Serial.println(" --> Serving web application from SPIFFS");
-    http_server.serveStatic("/", SPIFFS, "/").setDefaultFile(INDEX_FILE);
+    Serial.println(" --> Serving web application from LittleFS");
+    http_server.serveStatic("/", LittleFS, "/").setDefaultFile(INDEX_FILE);
   }
   else
   {
     Serial.println(" --> No web application found! Did you add it to the SD card or SPIFFs?");
   }
+
+  http_server.on("/api/info", HTTP_GET, [](AsyncWebServerRequest *request) {
+    char json[384];
+    snprintf(json, sizeof(json),
+             "{\"name\":\"DisAHRsterRadio\",\"version\":\"%s\",\"board\":\"%s\",\"node\":\"%s\",\"ssid\":\"%s\","
+             "\"lora\":%s,\"freq\":%.3f,\"sf\":%d,\"txPower\":%d,\"routes\":%d,\"clients\":%d,\"sd\":%s,\"uptime\":%lu}",
+             DAR_VERSION, BOARD_NAME, nodeAddress, ssid, loraInitialized ? "true" : "false", loraFreqMHz(), spreadingFactor,
+             txPower, routes, clients, sdInitialized ? "true" : "false", (unsigned long)(millis() / 1000));
+    request->send(200, "application/json", json);
+  });
 
   http_server.onNotFound([](AsyncWebServerRequest *request) {
     request->send(404);
@@ -291,24 +316,24 @@ public:
     Serial.printf("WelcomeMessage username: >%s<\n", username.c_str());
     if (username.isEmpty())
     {
-      msgLen = sprintf(data, "00c|Welcome to DISASTER RADIO ");
+      msgLen = sprintf(data, "00c|Willkommen bei DisAHRsterRadio ");
     }
     else
     {
-      msgLen = snprintf(data, 127, "00c|Welcome to DISASTER RADIO >%s<", username.c_str());
+      msgLen = snprintf(data, 127, "00c|Willkommen bei DisAHRsterRadio >%s<", username.c_str());
     }
 
     struct Datagram datagram1 = buildDatagram(BROADCAST, 'i', (uint8_t *)data, msgLen);
     client->receive(datagram1, msgLen + DATAGRAM_HEADER);
     if (!sdInitialized)
     {
-      msgLen = sprintf(data, "00c|WARNING: SD card not found, functionality may be limited");
+      msgLen = sprintf(data, "00c|Hinweis: keine SD-Karte, Verlauf nur im RAM");
       struct Datagram datagram2 = buildDatagram(BROADCAST, 'i', (uint8_t *)data, msgLen);
       client->receive(datagram2, msgLen + DATAGRAM_HEADER);
     }
     if (!loraInitialized)
     {
-      msgLen = sprintf(data, "00c|WARNING: LoRa radio not found, functionality may be limited");
+      msgLen = sprintf(data, "00c|WARNUNG: LoRa-Funkmodul nicht gefunden");
       struct Datagram datagram3 = buildDatagram(BROADCAST, 'i', (uint8_t *)data, msgLen);
       client->receive(datagram3, msgLen + DATAGRAM_HEADER);
     }
@@ -360,29 +385,22 @@ void setupLoRa()
   SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI); //LORA_CS);
   #endif
   
-  #if defined (ARDUINO_LORA)
-  Layer1Class *Layer1_1 = new Layer1Class();
-  Layer1_1->setPins(LORA_CS, LORA_RST, LORA_IRQ);
-  Layer1_1->setLoRaFrequency(loraFrq*1E6);
-  Layer1_1->setTxPower(txPower);
-  Layer1_1->setSpreadingFactor(spreadingFactor);
+  #if defined(LORA_SCK) && !defined(LOPY4)
+  SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI);
   #endif
-  
-  #if defined ( RL_SX1276 ) || defined ( RL_SX1262 )
   pinMode(LORA_CS, OUTPUT);
   digitalWrite(LORA_CS, LOW);
   #ifdef DUAL_LORA
   pinMode(LORA2_CS, OUTPUT);
   digitalWrite(LORA2_CS, HIGH);
   #endif
-  Layer1Class *Layer1_1 = new Layer1Class(&lora, 0, LORA_CS, LORA_RST, LORA_IRQ, 9, 915, 17);
+  Layer1Class *Layer1_1 = new Layer1Class(&lora, 0, LORA_CS, LORA_RST, LORA_IRQ, spreadingFactor, loraFreqMHz(), txPower, 125.0, LORA_TCXO);
   #ifdef DUAL_LORA
   digitalWrite(LORA_CS, HIGH);
   digitalWrite(LORA2_CS, LOW);
-  Layer1Class *Layer1_2 = new Layer1Class(&lora2, 0, LORA2_CS, LORA2_RST, LORA2_IRQ, 7, 915, 17);
+  Layer1Class *Layer1_2 = new Layer1Class(&lora2, 0, LORA2_CS, LORA2_RST, LORA2_IRQ, 7, loraFreqMHz(), txPower, 125.0, LORA_TCXO);
   digitalWrite(LORA_CS, LOW);
   digitalWrite(LORA2_CS, HIGH);
-  #endif
   #endif
   if(Layer1_1->init())
   {
@@ -467,6 +485,11 @@ void setupDisplay()
 {
 #ifdef HAS_OLED
   Serial.println("* Initializing display...");
+#ifdef VEXT_PIN
+  pinMode(VEXT_PIN, OUTPUT);
+  digitalWrite(VEXT_PIN, LOW);
+  delay(50);
+#endif
   if (OLED_RST != NOT_A_PIN)
   {
     pinMode(OLED_RST, OUTPUT);
@@ -511,6 +534,7 @@ void setupGPS()
 #endif
 }
 
+#ifdef HAS_BLE
 void setupBLE(void)
 {
   Serial.println("* Initializing BLE...");
@@ -525,6 +549,9 @@ void setupBLE(void)
   		->connect(ble_client);
   });
 }
+#else
+void setupBLE(void) { Serial.println("* BLE in diesem Build deaktiviert"); }
+#endif
 
 void setup()
 {
@@ -537,13 +564,16 @@ void setup()
   setCpuFrequencyMhz(CLOCK_SPEED); //Set CPU clock in config.h
   getCpuFrequencyMhz(); //Get CPU clock
 
+  Serial.printf("\nDisAHRsterRadio %s (%s) - basiert auf sudomesh/disaster-radio\n", DAR_VERSION, BOARD_NAME);
+  delay(STARTUP_STAGGER_MS); // gestaffelter Start: Spannung stabilisieren lassen
   if (!useBLE)
   {
   setupWiFi();
+  delay(STARTUP_STAGGER_MS);
   setupMDNS();
   }
   setupSD();
-  setupSPIFFS();
+  setupFS();
   if (!useBLE)
   {
   setupHTTPSever();
@@ -560,6 +590,7 @@ void setup()
   {
   setupBLE();
   }
+  delay(STARTUP_STAGGER_MS);
   setupLoRa();
   setupDisplay();
   setupGPS();

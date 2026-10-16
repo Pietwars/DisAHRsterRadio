@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DisAHRsterRadio · Ahrtal</title>
+<link rel="icon" href="icon.png">
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#eaf2f7;background:#101d27;color-scheme:dark;--line:#294b3d;--mesh:#9ee576;--sage:#b7d6b7;--wine:#b7506b;--card:#16283a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column}
+header{position:relative;height:120px;background:#0b141c url(header.jpg) center/cover}
+header .t{position:absolute;inset:auto 0 0 0;padding:8px 12px;background:linear-gradient(transparent,#101d27e0)}
+header h1{margin:0;font-size:1.3rem}header small{color:var(--sage)}
+#st{position:absolute;top:8px;right:10px;padding:3px 9px;border-radius:12px;font-size:.8rem;background:#0008}
+#st.ok{color:var(--mesh)}#st.bad{color:#ff9aa8}
+.warn{background:#3a1d26;border-left:4px solid var(--wine);padding:6px 10px;font-size:.85rem}
+nav{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}nav button{flex:1;background:none;border:0;color:#cfe;padding:10px 6px;font-size:.95rem;border-bottom:3px solid transparent}
+nav button.on{border-color:var(--mesh);color:var(--mesh)}
+main{flex:1;display:flex;flex-direction:column;min-height:0}section{display:none;padding:10px;flex:1;flex-direction:column;gap:8px}section.on{display:flex}
+#log{flex:1;overflow-y:auto;min-height:200px;display:flex;flex-direction:column;gap:5px}
+.m{background:var(--card);border-radius:8px;padding:6px 9px;max-width:92%;word-wrap:break-word}.m.self{align-self:flex-end;background:#1f3d2c}.m.sys{align-self:center;background:none;color:#9ab;font-size:.85rem}
+.m .n{color:var(--mesh);font-weight:600;margin-right:4px}.m .tm{color:#789;font-size:.7rem;margin-left:6px}.m .pend{color:#fc6}
+form{display:flex;gap:6px}input,select,textarea{flex:1;background:#0b141c;color:#eaf2f7;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:1rem}
+button.b{background:var(--mesh);color:#102;border:0;border-radius:8px;padding:9px 14px;font-weight:600;font-size:1rem}button.b2{background:#24384a;color:#eaf2f7}
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}.quick-btn{background:var(--card);color:#eaf2f7;border:1px solid var(--line);border-radius:10px;padding:12px 8px;font-size:.95rem;text-align:left}.quick-btn b{display:block;font-size:1.4rem}
+.quick-btn.H{border-left:4px solid var(--wine)}.quick-btn.I{border-left:4px solid #6ab0e0}.quick-btn.A{border-left:4px solid var(--mesh)}
+.muted{color:#9ab;font-size:.85rem;margin:0}.places{display:flex;flex-direction:column;gap:4px}.places button{text-align:left}
+table{border-collapse:collapse;font-size:.9rem}td{padding:3px 8px;border-bottom:1px solid #1d3346}
+h2{margin:4px 0;font-size:1.05rem}
+</style></head><body>
+<header><div id="st" class="bad">getrennt</div><div class="t"><h1>DisAHRsterRadio</h1><small>Ahrtal · LoRa-Mesh-Chat ohne Internet</small></div></header>
+<div class="warn">Kein zertifiziertes Notrufsystem. In Lebensgefahr immer <b>112</b> wählen, wenn irgendwie möglich.</div>
+<nav><button data-tab="chat" class="on">Chat</button><button data-tab="quick">Schnellmeldung</button><button data-tab="loc">Standort</button><button data-tab="info">Gerät</button></nav>
+<main>
+<section id="chat" class="on"><div id="log"></div>
+<form id="f"><input id="msg" maxlength="200" autocomplete="off" placeholder="Nachricht an alle …"><button class="b">Senden</button></form>
+<p class="muted" id="who"></p></section>
+<section id="quick"><h2>Schnellmeldung</h2><p class="muted">Vorlage antippen, Ort wählen, prüfen, dann senden.</p>
+<div class="quick-grid" id="qg"></div>
+<textarea id="qtext" rows="3" maxlength="200"></textarea>
+<form id="qf"><select id="qplace"></select><button class="b">Senden</button></form></section>
+<section id="loc"><h2>Standort</h2><p class="muted">GPS des Telefons funktioniert im Browser oft nur über HTTPS. Sonst bitte Ort aus der Liste wählen.</p>
+<form id="gf" onsubmit="return false"><button class="b b2" id="gps" type="button">📍 GPS-Position holen</button></form>
+<p id="gpsres" class="muted"></p><h2>Orte im Ahrtal</h2><div class="places" id="pl"></div></section>
+<section id="info"><h2>Gerät</h2><table id="it"></table>
+<p class="muted">Basiert auf <a href="https://github.com/sudomesh/disaster-radio" style="color:var(--sage)">sudomesh/disaster-radio</a> (GPLv3/AGPLv3).</p></section>
+</main>
+<script>
+const PLACES=[['Ahrweiler',50.5430,7.0965],['Bad Bodendorf',50.5579,7.2200],['Bad Neuenahr',50.5449,7.1377],['Dernau',50.5344,7.0435],['Heimersheim',50.5426,7.1761],['Heppingen',50.5512,7.1646],['Kripp (Ahrmündung)',50.5609,7.2691],['Lohrsdorf',50.5515,7.1865],['Mayschoß',50.5220,7.0198],['Rech',50.5132,7.0369],['Sinzig',50.5452,7.2491],['Walporzheim',50.5312,7.0794]];
+const QUICK=[['H','Trinkwasser benötigt, Personen: ','💧','Trinkwasser'],['H','Strom zum Laden benötigt (Handy/Gerät)','⚡','Strom / Laden'],['H','Medikamente benötigt: ','💊','Medikamente'],['H','Verletzte Person, Hilfe benötigt','🚑','Verletzt'],['I','Evakuierung / Sammelpunkt: ','🏃','Evakuierung'],['I','Mir geht es gut, bin hier erreichbar','✅','Mir geht es gut'],['A','Biete Hilfe an: ','🤝','Ich biete Hilfe'],['A','Strom/Ladestation verfügbar','🔋','Strom vorhanden']];
+const KIND={H:'HILFE',I:'INFO',A:'ANGEBOT'};
+const $=s=>document.querySelector(s),enc=new TextEncoder(),dec=new TextDecoder();
+const DEMO=/[?&]demo/.test(location.search);
+let ws,cid=0,pending={},name=localStorage.getItem('dar-name')||'',myPos=localStorage.getItem('dar-pos')||'';
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button,section').forEach(e=>e.classList.remove('on'));b.classList.add('on');$('#'+b.dataset.tab).classList.add('on');if(b.dataset.tab=='info')info()});
+function esc(t){return t.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function show(t,type,id){const d=document.createElement('div');d.className='m '+(type||'');const tm=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+ let m=t.match(/^<([^>]{1,32})>\s?([\s\S]*)$/),h;
+ if(t.startsWith('~')){d.className='m sys';h=esc(t.slice(1).trim().replace(' joined the channel',' ist beigetreten'))}
+ else if(m)h='<span class="n">'+esc(m[1])+'</span>'+esc(m[2]).replace(/(-?\d+\.\d{3,}),\s?(-?\d+\.\d{3,})/g,'<a style="color:var(--sage)" href="geo:$1,$2">$1,$2</a>');else h=esc(t);
+ d.innerHTML=h+'<span class="tm">'+tm+(id!==undefined?' <span class="pend" id="p'+id+'">⏳</span>':'')+'</span>';$('#log').append(d);$('#log').scrollTop=1e9}
+function status(ok){$('#st').textContent=ok?'verbunden':'getrennt';$('#st').className=ok?'ok':'bad'}
+function connect(){if(DEMO)return demo();ws=new WebSocket((location.protocol=='https:'?'wss://':'ws://')+location.host+'/ws');ws.binaryType='arraybuffer';
+ ws.onopen=()=>{status(1);if(name)raw('~ '+name+' joined the channel')};ws.onclose=()=>{status(0);setTimeout(connect,3000)};
+ ws.onmessage=e=>{const b=new Uint8Array(e.data);if(b.length<3)return;const id=b[0]|b[1]<<8,s=dec.decode(b.slice(2));
+  if(s==='!'){const p=document.getElementById('p'+id);if(p){p.textContent='✓';p.className=''}return}
+  if(s.startsWith('c|'))show(s.slice(2),s.slice(2).startsWith('<'+name+'>')?'self':'')}}
+function raw(text,mark){const id=cid=(cid+1)&0xffff,p=enc.encode('c|'+text),b=new Uint8Array(p.length+2);b[0]=id&255;b[1]=id>>8;b.set(p,2);
+ if(DEMO){setTimeout(()=>{const x=document.getElementById('p'+id);if(x){x.textContent='✓';x.className=''}},400)}else if(ws&&ws.readyState==1)ws.send(b);else{alert('Nicht verbunden');return false}
+ if(mark)show(text,'self',id);return true}
+function send(text){if(!name){name=(prompt('Dein Name (sichtbar für alle):')||'').trim().replace(/[<>\s]+/g,'_').slice(0,20);if(!name)return;localStorage.setItem('dar-name',name);raw('~ '+name+' joined the channel',false);who()}
+ const t='<'+name+'> '+text;if(enc.encode(t).length>220)return alert('Nachricht zu lang');raw(t,true)}
+function who(){$('#who').textContent=name?'Du schreibst als „'+name+'“'+(myPos?' · Standort: '+myPos:''):'Beim ersten Senden wirst du nach deinem Namen gefragt.'}
+$('#f').onsubmit=e=>{e.preventDefault();const v=$('#msg').value.trim();if(v){send(v);$('#msg').value=''}};
+QUICK.forEach(q=>{const b=document.createElement('button');b.type='button';b.className='quick-btn '+q[0];b.innerHTML='<b>'+q[2]+'</b>'+q[3];b.onclick=()=>{$('#qtext').value='['+KIND[q[0]]+'] '+q[1];$('#qtext').focus()};$('#qg').append(b)});
+$('#qplace').innerHTML='<option value="">– Ort (optional) –</option><option value="own">Mein Standort</option>'+PLACES.map((p,i)=>'<option value="'+i+'">'+p[0]+'</option>').join('');
+$('#qf').onsubmit=e=>{e.preventDefault();let t=$('#qtext').value.trim();if(!t)return;const v=$('#qplace').value;
+ if(v==='own'&&myPos)t+=' @ '+myPos;else if(v!==''&&v!=='own'){const p=PLACES[v];t+=' @ '+p[0]+' ('+p[1].toFixed(4)+','+p[2].toFixed(4)+')'}
+ send(t);$('#qtext').value='';document.querySelector('nav button').click()};
+$('#pl').innerHTML=PLACES.map((p,i)=>'<button class="b b2" data-i="'+i+'">'+p[0]+' <span class="muted">'+p[1].toFixed(4)+', '+p[2].toFixed(4)+'</span></button>').join('');
+$('#pl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=PLACES[b.dataset.i];myPos=p[0]+' ('+p[1].toFixed(4)+','+p[2].toFixed(4)+')';localStorage.setItem('dar-pos',myPos);$('#gpsres').textContent='Gewählt: '+myPos;who()};
+$('#gps').onclick=()=>{if(!navigator.geolocation)return $('#gpsres').textContent='Kein GPS im Browser verfügbar.';$('#gpsres').textContent='Suche Position …';
+ navigator.geolocation.getCurrentPosition(p=>{myPos=p.coords.latitude.toFixed(5)+','+p.coords.longitude.toFixed(5)+' (±'+Math.round(p.coords.accuracy)+' m)';localStorage.setItem('dar-pos',myPos);$('#gpsres').textContent='Position: '+myPos;who()},
+ e=>{$('#gpsres').textContent='GPS nicht möglich ('+e.message+'). Bitte Ort aus der Liste wählen.'},{enableHighAccuracy:true,timeout:15000})};
+async function info(){let d;try{d=DEMO?{name:'DisAHRsterRadio',version:'0.1.0-dev',board:'LILYGO T3-S3 SX1262',node:'a1b2c3d4',ssid:'DisAHRsterRadio-B2C3D4',lora:true,freq:869.525,sf:9,txPower:14,routes:2,clients:3,sd:false,uptime:4711}:await (await fetch('/api/info')).json()}catch(e){$('#it').innerHTML='<tr><td>Keine Gerätedaten</td></tr>';return}
+ const L={board:'Board',version:'Firmware',node:'Knotenadresse',ssid:'WLAN',lora:'LoRa aktiv',freq:'Frequenz (MHz)',sf:'Spreizfaktor',txPower:'Sendeleistung (dBm)',routes:'Routen',clients:'Verbundene Clients',sd:'SD-Karte',uptime:'Laufzeit (s)'};
+ $('#it').innerHTML=Object.keys(L).map(k=>'<tr><td>'+L[k]+'</td><td>'+esc(String(d[k]===true?'ja':d[k]===false?'nein':d[k]))+'</td></tr>').join('')}
+function demo(){status(1);if(!name){name='Peter';}[ '~ Anna joined the channel','<Anna> Heimersheim: Wasser steht in der Bachstraße, Brücke gesperrt.','<Jonas> [HILFE] Trinkwasser benötigt, Personen: 4 @ Lohrsdorf (50.5515,7.1865)','<Peter> Bin auf dem Weg, bringe 2 Kanister mit.','<Mia> [ANGEBOT] Strom/Ladestation verfügbar @ Bad Neuenahr (50.5449,7.1377)'].forEach(t=>show(t,t.startsWith('<Peter>')?'self':''))}
+who();connect();
+</script></body></html>

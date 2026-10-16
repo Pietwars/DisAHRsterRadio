@@ -3,9 +3,9 @@
 Preferences preferences;
 
 String username = "";
-bool useBLE = true;
-int txPower = 17;
-int loraFrq = 915;
+bool useBLE = false;
+int txPower = 14;
+int loraFrq = 869; // MHz (ganzzahlig, 869 => 869.525 MHz EU868 g3)
 int spreadingFactor = 9;
 double dutyCycle = .1;
 long routeInterval = 10000;
@@ -30,7 +30,11 @@ void getSettings(void)
   Serial.printf("Got username %s\n", username.c_str());
 
   // Try to get settings, if key does not exist, use default values
+  #ifdef HAS_BLE
   useBLE = preferences.getBool("ble", false);
+#else
+  useBLE = false;
+#endif
   Serial.printf("Got IF setting %s\n", useBLE ? "BLE" : "WiFi");
   txPower = preferences.getInt("txPwr", txPower);
   Serial.printf("Got txPwr setting %d\n", txPower);
