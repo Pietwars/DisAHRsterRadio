@@ -4,19 +4,21 @@
 <title>DisAHRsterRadio · Ahrtal</title>
 <link rel="icon" href="icon.png">
 <style>
-:root{font-family:system-ui,-apple-system,sans-serif;color:#eaf2f7;background:#101d27;color-scheme:dark;--line:#294b3d;--mesh:#9ee576;--sage:#b7d6b7;--wine:#b7506b;--card:#16283a}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column}
-header{position:relative;height:120px;background:#0b141c url(header.jpg) center/cover}
-header .t{position:absolute;inset:auto 0 0 0;padding:8px 12px;background:linear-gradient(transparent,#101d27e0)}
-header h1{margin:0;font-size:1.3rem}header small{color:var(--sage)}
-#st{position:absolute;top:8px;right:10px;padding:3px 9px;border-radius:12px;font-size:.8rem;background:#0008}
+:root{font-family:system-ui,-apple-system,sans-serif;color:#eaf2f7;color-scheme:dark;--line:#294b3d;--mesh:#9ee576;--sage:#b7d6b7;--wine:#b7506b;--card:#14263ad9}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column}html{background:#0b141c}
+body::before{content:"";position:fixed;inset:0;z-index:-2;background:#0b141c url(bg.jpg) 58% 80%/cover no-repeat;background-image:image-set(url(bg.webp) type("image/webp"),url(bg.jpg) type("image/jpeg"))}
+body::after{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,#0b141c55 0%,#0b141c00 40%,#0b141c00 70%,#0b141c88 100%)}
+@media (min-width:900px){body{max-width:900px;margin:0 auto;width:100%}body::before{background-position:center 55%}}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:8px 12px;background:#0b141ccc;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+header .t{flex:1}header h1{margin:0;font-size:1.15rem;line-height:1.1}header small{color:var(--sage)}
+#st{padding:3px 9px;border-radius:12px;font-size:.8rem;background:#0008}
 #st.ok{color:var(--mesh)}#st.bad{color:#ff9aa8}
-.warn{background:#3a1d26;border-left:4px solid var(--wine);padding:6px 10px;font-size:.85rem}
-nav{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}nav button{flex:1 0 auto;background:none;border:0;color:#cfe;padding:10px 6px;font-size:.95rem;border-bottom:3px solid transparent}
+.warn{background:#3a1d26cc;border-left:4px solid var(--wine);padding:6px 10px;font-size:.85rem}
+nav{display:flex;background:#0b141cb0;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid var(--line);overflow-x:auto}nav button{flex:1 0 auto;background:none;border:0;color:#cfe;padding:10px 6px;font-size:.95rem;border-bottom:3px solid transparent}
 nav button.on{border-color:var(--mesh);color:var(--mesh)}
-main{flex:1;display:flex;flex-direction:column;min-height:0}section{display:none;padding:10px;flex:1;flex-direction:column;gap:8px}section.on{display:flex}
+main{flex:1;display:flex;flex-direction:column;min-height:0}section{display:none;padding:10px;margin:8px;border-radius:12px;background:transparent;flex:1;flex-direction:column;gap:8px}section.on{display:flex}
 #log{flex:1;overflow-y:auto;min-height:200px;display:flex;flex-direction:column;gap:5px}
-.m{background:var(--card);border-radius:8px;padding:6px 9px;max-width:92%;word-wrap:break-word}.m.self{align-self:flex-end;background:#1f3d2c}.m.sys{align-self:center;background:none;color:#9ab;font-size:.85rem}
+.m{background:var(--card);border-radius:8px;padding:6px 9px;max-width:92%;word-wrap:break-word}.m.self{align-self:flex-end;background:#1f3d2cdd}.m.sys{align-self:center;background:#0b141c99;color:#9ab;font-size:.85rem}
 .m .n{color:var(--mesh);font-weight:600;margin-right:4px}.m .tm{color:#789;font-size:.7rem;margin-left:6px}.m .pend{color:#fc6}
 form{display:flex;gap:6px}input,select,textarea{flex:1;background:#0b141c;color:#eaf2f7;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:1rem}
 button.b{background:var(--mesh);color:#102;border:0;border-radius:8px;padding:9px 14px;font-weight:600;font-size:1rem}button.b2{background:#24384a;color:#eaf2f7}
@@ -34,7 +36,7 @@ h2{margin:4px 0;font-size:1.05rem}
 #mapctl{position:absolute;left:6px;top:6px;display:flex;flex-direction:column;gap:4px}#mapctl button{width:34px;height:34px;padding:0;font-size:1.1rem}
 .legend{font-size:.78rem;color:#9ab;display:flex;gap:10px;flex-wrap:wrap}.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:3px;vertical-align:-1px}
 </style></head><body>
-<header><div id="st" class="bad">getrennt</div><div class="t"><h1>DisAHRsterRadio</h1><small>Ahrtal · LoRa-Mesh-Chat ohne Internet</small></div></header>
+<header><div class="t"><h1>DisAHRsterRadio</h1><small>Ahrtal · LoRa-Mesh ohne Internet</small></div><div id="st" class="bad">getrennt</div></header>
 <div class="warn">Kein zertifiziertes Notrufsystem. In Lebensgefahr immer <b>112</b> wählen, wenn irgendwie möglich.</div>
 <nav><button data-tab="chat" class="on">Chat</button><button data-tab="quick">Schnellmeldung</button><button data-tab="board">Brett</button><button data-tab="map">Karte</button><button data-tab="loc">Standort</button><button data-tab="info">Gerät</button></nav>
 <main>
