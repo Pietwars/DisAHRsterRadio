@@ -2,6 +2,8 @@
 
 ## 0.1.1-dev · Entwicklungsstand (kein Release)
 
+- **Zentrale Version (17.10.2026):** Datei `VERSION` ist die einzige Quelle; `tools/version.py` schreibt `DAR_VERSION` (config.h), Fußzeile „Weboberfläche DisAHRsterRadio …“ im Gerät-Reiter, Demo-Gerätedaten, README-Versionszeile; `--check` + `tests/version.test.py` laufen in CI. `tools/package.sh` und das Demo-Banner (`build_pages.py`) lesen `VERSION`.
+- Projektfamilie: gemeinsame Tabelle mit allen fünf Repositorys (DisasterMesh, DisAHRsterRadio-MeshCore, DisAHRsterRadio, HaldenFunk, HaldenFunk-MeshCore).
 - **Vereinheitlichung (17.10.2026):** README mit Abschnitt „Projektfamilie DisAHRsterRadio“ (in allen drei Repositorys identisch), Versionszeile, ehrlichem Hardwarestand (LILYGO T3 V1.6.1 lief beim Nutzer, Heltec V2 Brownout, T3-S3 ungetestet); Vorschaubilder aller sechs Bereiche neu aus der Live-Demo (`docs/images/funktion-*.jpg`), alte `dar-*.png` entfernt; Demo meldet Version 0.1.1-dev.
 - **Flyer:** `docs/flyer/DisAHRsterRadio-Flyer.pdf` (Druck, QR-Codes zu Repository und Demo) und `DisAHRsterRadio-Flyer-digital.pdf` (klickbare Links), in der Live-Demo unter `/flyer/` verlinkt.
 - **Live-Demo** auf GitHub Pages: https://pietwars.github.io/DisAHRsterRadio/ (simulierte Daten, Hinweisbanner).
