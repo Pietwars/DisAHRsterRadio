@@ -11,6 +11,9 @@
 #include <Preferences.h>
 #include <SD.h>
 #include <LittleFS.h>
+#ifdef DAR_OMI
+#include <DNSServer.h> // Omi: Captive Portal, Seite oeffnet sich nach WLAN-Verbindung von selbst
+#endif
 #ifdef HAS_OLED
 #include <SSD1306Wire.h>
 #endif
@@ -51,7 +54,11 @@
 
 #define MDNS_NAME_PREFIX "disahrster"
 #define HOST_NAME "disahrsterradio"
+#ifdef DAR_OMI
+#define WIFI_AP_SSID_PREFIX "Notfunk-" // Omi: kurzer, verstaendlicher WLAN-Name
+#else
 #define WIFI_AP_SSID_PREFIX "DisAHRsterRadio-"
+#endif
 
 #define INDEX_FILE "index.html"
 
@@ -68,6 +75,9 @@ SPIClass sd_card(VSPI_OR_FSPI);
 
 AsyncWebServer http_server(80);
 AsyncWebSocket ws_server("/ws");
+#ifdef DAR_OMI
+DNSServer dns_server;
+#endif
 
 #ifdef HAS_BLE
 BleUartClient ble_client;
@@ -187,6 +197,11 @@ void setupWiFi()
 #endif
     WiFi.setHostname(HOST_NAME);
     apOk = startSoftAP();
+#ifdef DAR_OMI
+    // Jede Adresse zeigt auf dieses Geraet -> Handy oeffnet die Seite automatisch
+    dns_server.setErrorReplyCode(DNSReplyCode::NoError);
+    dns_server.start(53, "*", WiFi.softAPIP());
+#endif
 
     ip = WiFi.localIP();
     ip = WiFi.softAPIP();
@@ -287,6 +302,7 @@ void setupHTTPSever()
     request->send(200, "application/json", json);
   });
 
+#ifndef DAR_OMI // Omi: Funkprofil fest (EU Narrow), keine Einstellungen
   // Funkprofile auflisten / waehlen (gespeichert im NVS, wirksam nach Neustart)
   http_server.on("/api/presets", HTTP_GET, [](AsyncWebServerRequest *request) {
     String j = "[";
@@ -309,13 +325,19 @@ void setupHTTPSever()
     if (!t) { esp_timer_create_args_t a = {}; a.callback = [](void *) { ESP.restart(); }; a.name = "rst"; esp_timer_create(&a, &t); }
     esp_timer_start_once(t, 1500000);
   });
+#endif
 
   http_server.on("/api/board", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "application/json", board ? board->toJson() : String("[]"));
   });
 
   http_server.onNotFound([](AsyncWebServerRequest *request) {
+#ifdef DAR_OMI
+    // Captive Portal: unbekannte Seiten (z. B. Handy-Internettest) auf die Startseite umleiten
+    request->redirect("http://" + WiFi.softAPIP().toString() + "/");
+#else
     request->send(404);
+#endif
   });
 
   http_server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
@@ -363,6 +385,17 @@ public:
   {
     char data[128] = {0};
     int msgLen = 0;
+#ifdef DAR_OMI
+    // Omi: keine Technik-Hinweise, nur wenn der Funk nicht geht
+    if (!loraInitialized)
+    {
+      msgLen = sprintf(data, "00c|Achtung: Der Funk geht nicht. Bitte das Gerät aus- und wieder einschalten.");
+      struct Datagram d = buildDatagram(BROADCAST, 'i', (uint8_t *)data, msgLen);
+      client->receive(d, msgLen + DATAGRAM_HEADER);
+    }
+    client->setup();
+    return;
+#endif
     Serial.printf("WelcomeMessage username: >%s<\n", username.c_str());
     if (username.isEmpty())
     {
@@ -394,6 +427,10 @@ public:
 void setupSerial()
 {
   Serial.println("* Initializing serial...");
+#ifdef DAR_OMI
+  Serial.println(" --> Omi: keine serielle Konsole (nur Protokoll)");
+  return;
+#endif
 
   radio->connect(new WelcomeMessage())
       ->connect(new HistoryReplay(history))
@@ -481,6 +518,40 @@ void drawStatusBar()
   {
     return;
   }
+#ifdef DAR_OMI
+  // Omi: immer derselbe einfache Text, kein Menue, keine Seiten.
+  // Kleine Verschiebung (0-2 px) alle paar Minuten gegen Einbrennen des OLED.
+  int dx = (millis() / 300000UL) % 3;
+  display.clear();
+  display.setColor(WHITE);
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  if (!ssid[0])
+  {
+    display.setFont(ArialMT_Plain_16);
+    display.drawString(dx, 24, "Bitte warten ...");
+  }
+  else if (!loraInitialized)
+  {
+    display.setFont(ArialMT_Plain_16);
+    display.drawString(dx, 0, "Funk FEHLER");
+    display.setFont(ArialMT_Plain_10);
+    display.drawString(dx, 24, "Bitte Gerät aus- und");
+    display.drawString(dx, 36, "wieder einschalten.");
+  }
+  else
+  {
+    display.setFont(ArialMT_Plain_16);
+    display.drawString(dx, 0, apOk ? "Funk an" : "Funk an, WLAN ...");
+    display.setFont(ArialMT_Plain_10);
+    display.drawString(dx, 20, "Handy mit WLAN verbinden:");
+    display.setFont(ArialMT_Plain_16);
+    display.drawString(dx, 32, ssid);
+    display.setFont(ArialMT_Plain_10);
+    display.drawString(dx, 52, "ohne Passwort");
+  }
+  display.display();
+  return;
+#endif
 
   display.setFont(ArialMT_Plain_10);
 
@@ -545,7 +616,9 @@ void setupDisplay()
     display.flipScreenVertically();
     display.clear();
 
+#ifndef DAR_OMI // Omi: keine Nachrichten auf dem Display, nur fester Statustext
     radio->connect(new OLEDClient(&display, 0, STATUS_BAR_HEIGHT + 1, OLED_WIDTH, OLED_HEIGHT));
+#endif
 
     drawStatusBar();
   }
@@ -622,7 +695,12 @@ void setup()
   bootMark("Serial");
 
   // Get saved settings
+#ifdef DAR_OMI
+  // Omi: gespeicherte Einstellungen werden ignoriert -> immer Standard (Funkprofil EU Narrow)
+  Serial.println("Omi-Version: feste Standardeinstellungen");
+#else
   getSettings();
+#endif
   bootMark("Einstellungen");
 
   setCpuFrequencyMhz(CLOCK_SPEED); //Set CPU clock in config.h
@@ -653,6 +731,9 @@ void setup()
   setupNetwork();
 #endif
   bootMark("fertig");
+#ifdef DAR_OMI
+  drawStatusBar(); // WLAN-Name steht erst jetzt fest (Heltec: WLAN zuletzt)
+#endif
 
   internal_clients = radio->clients.size();
 
@@ -661,6 +742,9 @@ void setup()
 
 void loop()
 {
+#ifdef DAR_OMI
+  dns_server.processNextRequest();
+#endif
   radio->loop();
   if(loraInitialized){
     int new_clients = radio->clients.size() - internal_clients;
@@ -696,7 +780,9 @@ void loop()
       lastApPrint = millis();
       Serial.printf("[WLAN] %s | SSID: %s | offen, ohne Passwort | http://%s | Clients: %d\n", apOk ? "AP aktiv" : "AP FEHLER", ssid,
                     WiFi.softAPIP().toString().c_str(), WiFi.softAPgetStationNum());
-#ifdef HAS_OLED
+#if defined(HAS_OLED) && defined(DAR_OMI)
+      drawStatusBar();
+#elif defined(HAS_OLED)
       if (displayInitialized && clients == 0)
       {
         display.setColor(BLACK);
