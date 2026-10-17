@@ -1,5 +1,7 @@
 # DisAHRsterRadio
 
+**🔴 Live-Demo (simulierte Daten, kein Gerät nötig): https://pietwars.github.io/DisAHRsterRadio/**
+
 ![DisAHRsterRadio Ahrtal](docs/images/disahrsterradio-header.jpg)
 
 **Offline-Chat über LoRa-Mesh für das Ahrtal** – ein Gerät spannt ein eigenes WLAN auf, man verbindet sich mit dem Handy und schreibt im Browser. Die Nachrichten laufen per LoRa von Gerät zu Gerät weiter, ganz ohne Internet oder Mobilfunk.
