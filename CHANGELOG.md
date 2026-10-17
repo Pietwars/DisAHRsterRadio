@@ -1,5 +1,12 @@
 # Änderungen
 
+## Unveröffentlicht – offener Zugang
+
+- Offenes WLAN ohne Passwort, auch bei bestehenden Installationen.
+- Telnet (Port 23) deaktiviert, Konfiguration über USB; kombinierte WLAN+BLE-UART-Testprofile (`*-ble`, ohne PIN) ergänzt.
+- Zugangsanleitung und Regressionstests ergänzt; Hardwareabnahme steht aus.
+
+
 ## 0.1.1-alpha · 17.10.2026 · erste Vorabversion (automatisches Release)
 
 - **Funkprofile für 868 MHz (17.10.2026):** neuer Standard **EU Narrow 869,618 MHz, 62,5 kHz, SF8, CR 4/8** (vorher 869,525 MHz, 125 kHz, SF9, CR 4/5 – jetzt Profil „Mittel“). Wählbar: Nah/Schnell (BW 250, SF7), Mittel (BW 125, SF9), Fern (BW 125, SF12, CR 4/8), LongFast-ähnlich (BW 250, SF11), alle im Teilband 869,4–869,65 MHz. Auswahl im Gerät-Reiter (NVS, Neustart), `/set preset N`, `GET /api/presets`, `POST /api/preset`. **Achtung:** Geräte mit älterer Firmware funken auf „Mittel“ – entweder alle aktualisieren oder alle auf „Mittel“ stellen.
