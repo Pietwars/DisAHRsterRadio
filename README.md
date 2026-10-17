@@ -4,11 +4,26 @@
 
 ![DisAHRsterRadio Ahrtal](docs/images/disahrsterradio-header.jpg)
 
+**Version 0.1.1-dev** (Entwicklungsstand, kein Release) · disaster-radio/LoRaLayer2 + RadioLib 7 · Weboberfläche MeshAhrtal · 868 MHz · Firmware über [Actions](https://github.com/Pietwars/DisAHRsterRadio/actions) · **Flyer (A5):** [Druck-PDF mit QR-Codes](docs/flyer/DisAHRsterRadio-Flyer.pdf) · [Digital-PDF mit klickbaren Links](docs/flyer/DisAHRsterRadio-Flyer-digital.pdf)
+
 **Offline-Chat über LoRa-Mesh für das Ahrtal** – ein Gerät spannt ein eigenes WLAN auf, man verbindet sich mit dem Handy und schreibt im Browser. Die Nachrichten laufen per LoRa von Gerät zu Gerät weiter, ganz ohne Internet oder Mobilfunk.
 
 Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https://github.com/sudomesh/disaster-radio)** mit der Ahrtal-Weboberfläche aus **[Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh)** – aber **ohne MeshCore**: Funk und Routing laufen über das ursprüngliche disaster-radio-Konzept (Layer1 + LoRaLayer2).
 
-Verwandte Repositorys: [Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh) (Hauptprojekt, MeshCore 1.18 mit großer MeshAhrtal-Oberfläche) · [Pietwars/DisAHRsterRadio-MeshCore](https://github.com/Pietwars/DisAHRsterRadio-MeshCore) (dieselbe Oberfläche wie hier, aber auf MeshCore 1.18 – kompatibel zu MeshCore-Geräten).
+<!-- projektfamilie:start (in allen drei Repositorys identisch) -->
+### Projektfamilie DisAHRsterRadio
+
+| Repository | Inhalt | Version | Demo · Download · Flyer |
+|---|---|---|---|
+| [Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh) | Original-Repo: MeshCore 1.18 mit der großen Weboberfläche MeshAhrtal, Karten, Werkzeuge, Doku | 0.9.0-alpha | [Live-Demo](https://pietwars.github.io/DisasterMesh/demo/) · [Projektseite](https://pietwars.github.io/DisasterMesh/) · Firmware über [Actions](https://github.com/Pietwars/DisasterMesh/actions) · Flyer [Druck](https://pietwars.github.io/DisasterMesh/flyer/DisasterMesh-Flyer.pdf) / [digital](https://pietwars.github.io/DisasterMesh/flyer/DisasterMesh-Flyer-digital.pdf) |
+| [Pietwars/DisAHRsterRadio-MeshCore](https://github.com/Pietwars/DisAHRsterRadio-MeshCore) | MeshCore 1.18 mit kompakter MeshAhrtal-Oberfläche per WLAN plus Bluetooth für die MeshCore-App, 105 Geräte | 0.9.0-alpha | [Live-Demo](https://pietwars.github.io/DisAHRsterRadio-MeshCore/) · [Release v0.9.0-alpha](https://github.com/Pietwars/DisAHRsterRadio-MeshCore/releases/tag/v0.9.0-alpha) · Flyer [Druck](https://pietwars.github.io/DisAHRsterRadio-MeshCore/flyer/DisAHRsterRadio-MeshCore-Flyer.pdf) / [digital](https://pietwars.github.io/DisAHRsterRadio-MeshCore/flyer/DisAHRsterRadio-MeshCore-Flyer-digital.pdf) |
+| [Pietwars/DisAHRsterRadio](https://github.com/Pietwars/DisAHRsterRadio) | Ohne MeshCore: modernisiertes disaster-radio (LoRaLayer2, RadioLib) mit kompakter MeshAhrtal-Oberfläche – nicht kompatibel zu MeshCore-Knoten | 0.1.1-dev | [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) · Firmware über [Actions](https://github.com/Pietwars/DisAHRsterRadio/actions) · Flyer [Druck](https://pietwars.github.io/DisAHRsterRadio/flyer/DisAHRsterRadio-Flyer.pdf) / [digital](https://pietwars.github.io/DisAHRsterRadio/flyer/DisAHRsterRadio-Flyer-digital.pdf) |
+
+**Namen:** **DisAHRsterRadio** = Projekt und Marke (auch WLAN-Name `DisAHRsterRadio-XXXXXX`) · **MeshAhrtal** = die Weboberfläche im Handy-Browser · **DisasterMesh** = das Original-Repository.
+Haupt-Boards: LILYGO T3-S3 V1.3, LILYGO T3 V1.6.1 (TTGO), Heltec WiFi LoRa 32 V2 – alle 868 MHz; Hardware-Abnahme steht aus (bisher lief nur LILYGO T3 V1.6.1 beim Nutzer). Druck-Flyer haben QR-Codes, digitale Flyer klickbare Links. Alle Demos sind simuliert.
+
+> ⚠️ Prototyp, kein zertifiziertes Notrufsystem. **Im Notfall immer 112.**
+<!-- projektfamilie:end -->
 
 > ⚠️ **Wichtig:** DisAHRsterRadio ist **kein zertifiziertes Notrufsystem** und ersetzt keine Behörden-Kommunikation. In Lebensgefahr immer **112** wählen, wenn irgendwie möglich.
 
@@ -17,7 +32,7 @@ Verwandte Repositorys: [Pietwars/DisasterMesh](https://github.com/Pietwars/Disas
 | Punkt | Stand |
 |---|---|
 | Firmware baut für alle 3 Boards | ✅ (lokal und per GitHub Actions) |
-| Auf echter Hardware getestet | ❌ **noch nicht** – weder Funk, WLAN noch Web-UI auf einem Gerät geprüft |
+| Auf echter Hardware getestet | ⚠️ teilweise: LILYGO T3 V1.6.1 lief beim Nutzer vollständig (OLED, WLAN, Weboberfläche, Chat, LoRa-Empfang); Heltec V2 zeigte ein Strom-/Brownout-Problem (WLAN-AP fehlte), WLAN-Fix enthalten, ungeprüft; T3-S3 ungetestet |
 | Funkverbindung zwischen zwei Geräten | ❓ ungetestet |
 | Kompatibel mit altem disaster-radio-Funk (915 MHz/US) | ❌ nein, EU868-Standard |
 | Kompatibel mit MeshCore/DisasterMesh-Geräten | ❌ nein, anderes Funkprotokoll |
@@ -44,7 +59,13 @@ Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nac
 
 ## Weboberfläche (MeshAhrtal)
 
-![Weboberfläche](docs/images/dar-ui.png)
+| Chat | Schnellmeldung | Brett |
+|---|---|---|
+| <img src="docs/images/funktion-chat.jpg" width="230" alt="Chat"> | <img src="docs/images/funktion-quick.jpg" width="230" alt="Schnellmeldung"> | <img src="docs/images/funktion-board.jpg" width="230" alt="Brett"> |
+| **Karte** | **Standort** | **Gerät** |
+| <img src="docs/images/funktion-map.jpg" width="230" alt="Karte"> | <img src="docs/images/funktion-loc.jpg" width="230" alt="Standort"> | <img src="docs/images/funktion-info.jpg" width="230" alt="Gerät"> |
+
+(Aufnahmen der [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) in Handygröße, Stand 0.1.1-dev; alle Daten simuliert.)
 
 - Chat an alle (disaster-radio-WebSocket `/ws`, Format `<ID 2 Byte>c|<Name> Text`, Zustellbestätigung ✓ = vom Gerät angenommen, *nicht* beim Empfänger)
 - Schnellmeldungen (Trinkwasser, Strom, Medikamente, Verletzt, Evakuierung, „Mir geht es gut“, Hilfe-Angebote)
@@ -52,11 +73,9 @@ Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nac
 - **Schwarzes Brett:** Aushänge (optional „wichtig/angeheftet“, Laufzeit 6 h – 7 Tage) werden auf jedem Gerät in LittleFS (`/board.txt`) gespeichert, per Funk als eigener Datagramm-Typ `b` verteilt, anhand einer zufälligen 8-stelligen ID entdoppelt und von jedem Gerät einmal weitergesendet (Mehrsprung). Alle ~5 min sendet jedes Gerät einen gespeicherten Aushang erneut, damit später eingeschaltete Geräte nachziehen. Max. 30 Aushänge pro Gerät; `GET /api/board`
 - **Offline-Karte:** fünf OSM-Pakete aus DisasterMesh (Ahrtal-Übersicht, Heimersheim mit Gebäuden, Dernau/Ahrweiler, Altenahr, Sinzig), kompakt und gzip-komprimiert (zusammen ca. 280 KB) im LittleFS; Anzeige mit Orten, Versorgungspunkten, eigener Position und Positionen aus Chat-/Brett-Nachrichten (Koordinaten im Text). Erzeugen mit `tools/make_map.py`. © OpenStreetMap-Mitwirkende, ODbL 1.0 (`web/static/map/ODbL-1.0.txt`)
 - Geräteinfo über `GET /api/info` (JSON)
-- Demo ohne Gerät: `web/static/index.html?demo=1` lokal öffnen
+- Demo ohne Gerät: [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) oder `web/static/index.html?demo=1` lokal öffnen
 
 Die MeshCore-spezifischen Funktionen aus DisasterMesh (Kanäle, Direktnachrichten, Karten-Download/-Import, eigene POIs, Admin) sind **nicht** übernommen.
-
-![Schwarzes Brett](docs/images/dar-brett.png) ![Karte](docs/images/dar-karte.png)
 
 ## Erste Schritte
 
