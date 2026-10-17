@@ -10,6 +10,8 @@ Aufruf (im Repository):  python3 tools/flyer/flyer.py [--json tools/flyer/flyer.
 Benötigt: Python-Paket qrcode (pip install qrcode pillow) und Chrome/Chromium (headless),
           gefunden über $CHROME, google-chrome, chromium, chromium-browser oder Playwright-Browser.
 Platzhalter in flyer.json: @VERSION@ (aus der Datei VERSION), @RELEASE@ (Release-URL des Tags v@VERSION@).
+Optional "keep_html": Pfad, unter dem die Druck-HTML im Repository bleibt (z. B. docs/flyer/flyer.html).
+Optional "credit": Fußzeile links (Standard: © Pietwars · Bild © Pietwars · Kartendaten © OpenStreetMap).
 """
 import argparse, glob, html, json, os, shutil, subprocess, sys, tempfile
 from pathlib import Path
@@ -77,7 +79,7 @@ def page(f, digital):
 <div><h2>So startest du</h2><div class="steps">{steps}</div></div>
 <div class="join"><div><h2>Projekt &amp; Download</h2><p style="font-size:8.6pt">Code, Anleitung, Fehler melden und mitmachen:</p>{urls}</div><div class="qr">{a(f['qr_url'], q1)}<small>{f['qr_label']}</small></div><div class="qr">{a(f['demo'], q2)}<small>Demo</small></div></div>
 <div class="warn"><b>Prototyp, kein zertifiziertes Notrufsystem.</b> Gemeinschaftsprojekt im Aufbau, ohne Gewähr. <b>Im Notfall immer 112.</b></div>
-<footer><span>© Pietwars · Bild © Pietwars · Kartendaten © OpenStreetMap (ODbL)</span><span>Stand {f['version']}</span></footer></div></html>"""
+<footer><span>{f.get('credit', '© Pietwars · Bild © Pietwars · Kartendaten © OpenStreetMap (ODbL)')}</span><span>Stand {f['version']}</span></footer></div></html>"""
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--json', default='tools/flyer/flyer.json'); ap.add_argument('--out', default='docs/flyer')
@@ -101,6 +103,11 @@ def main():
         print('geschrieben:', pdf)
     for p in (out / f'{f["name"]}-Flyer-qr.png', out / f'{f["name"]}-Flyer-demo-qr.png'):
         shutil.copy(tmp / ('qr-projekt.png' if 'demo' not in p.name else 'qr-demo.png'), p)
+    if f.get('keep_html'):  # Druck-HTML im Repo behalten (Bildpfade relativ zu docs/flyer)
+        h = page(f, False).replace('hero.jpg', Path(f['hero']).name).replace('qr-projekt.png', f'{f["name"]}-Flyer-qr.png').replace('qr-demo.png', f'{f["name"]}-Flyer-demo-qr.png')
+        dst = ROOT / f['keep_html']; dst.write_text(h, encoding='utf-8')
+        if not (dst.parent / Path(f['hero']).name).exists(): shutil.copy(ROOT / f['hero'], dst.parent / Path(f['hero']).name)
+        print('geschrieben:', dst)
     if shutil.which('pdftoppm'):
         subprocess.run(['pdftoppm', '-jpeg', '-r', '110', '-singlefile', str(out / f'{f["name"]}-Flyer.pdf'), str(out / f'{f["name"]}-Flyer-vorschau')], check=True)
         print('geschrieben:', out / f'{f["name"]}-Flyer-vorschau.jpg')
