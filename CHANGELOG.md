@@ -1,5 +1,14 @@
 # Änderungen
 
+## Unveröffentlicht – offener Zugang
+
+- Offenes WLAN ohne Passwort, auch bei bestehenden Installationen.
+- MeshCore: PIN-freies BLE und Trennung von Teilnehmer- und Betreiberbefehlen.
+- Verkürzte Companion-Steuerbefehle und Pfadlängen vor Zugriff prüfen.
+- LoRaLayer2: Telnet deaktiviert und kombinierte BLE-UART-Testprofile ergänzt.
+- Zugangsanleitung und Regressionstests ergänzt; Hardwareabnahme steht aus.
+
+
 ## 0.1.1-alpha · 17.10.2026 · erste Vorabversion (automatisches Release)
 
 - **Flyer 0.1.1-alpha** (Druck mit QR-Codes zu Download und Demo, digital mit klickbaren Links) mit dem neuen Generator `tools/flyer/flyer.py` (Konfiguration `tools/flyer/flyer.json`, Version aus `VERSION`); werden an das Release angehängt.
