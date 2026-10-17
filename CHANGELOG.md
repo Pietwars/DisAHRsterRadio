@@ -3,9 +3,7 @@
 ## Unveröffentlicht – offener Zugang
 
 - Offenes WLAN ohne Passwort, auch bei bestehenden Installationen.
-- MeshCore: PIN-freies BLE und Trennung von Teilnehmer- und Betreiberbefehlen.
-- Verkürzte Companion-Steuerbefehle und Pfadlängen vor Zugriff prüfen.
-- LoRaLayer2: Telnet deaktiviert und kombinierte BLE-UART-Testprofile ergänzt.
+- Telnet (Port 23) deaktiviert, Konfiguration über USB; kombinierte WLAN+BLE-UART-Testprofile (`*-ble`, ohne PIN) ergänzt.
 - Zugangsanleitung und Regressionstests ergänzt; Hardwareabnahme steht aus.
 
 

@@ -1,4 +1,4 @@
-> Neuer Entwicklungsstand: WLAN ohne Passwort; BLE-UART ohne PIN in den zusätzlichen Testprofilen. Alte Kopplungen bei Bedarf am Handy entfernen. Betreiberzugang bleibt getrennt geschützt. Details: https://github.com/Pietwars/DisAHRsterRadio/blob/main/docs/OFFENER_ZUGANG.md
+> Neuer Entwicklungsstand: WLAN ohne Passwort; BLE-UART ohne PIN in den zusätzlichen Testprofilen. Alte Kopplungen bei Bedarf am Handy entfernen. Details: https://github.com/Pietwars/DisAHRsterRadio/blob/main/docs/OFFENER_ZUGANG.md
 
 # DisAHRsterRadio für @BOARD@
 
