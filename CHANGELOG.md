@@ -5,6 +5,7 @@
 - Offenes WLAN ohne Passwort, auch bei bestehenden Installationen.
 - Telnet (Port 23) deaktiviert, Konfiguration über USB; kombinierte WLAN+BLE-UART-Testprofile (`*-ble`, ohne PIN) ergänzt.
 - Zugangsanleitung und Regressionstests ergänzt; Hardwareabnahme steht aus.
+- **Firmware verkleinert (ca. 29–38 KB weniger Flash, Funktionen unverändert):** `-fno-exceptions` (kein try/catch im Code, ~19 KB), `sscanf` durch `strtol`/`strtod` ersetzt (scanf-Parser entfällt, ~10 KB), SD-Code nur noch bei Boards mit SD-Schacht (Heltec V2 ~7 KB). Aufgeräumt: Reste aus disaster-radio entfernt (Telnet-/Socat-/WebSocket++-Clients, `SIM`-, `LOPY4`-, `DUAL_LORA`-Zweige), Vorlage `secrets.H` → `secrets.example.h`.
 
 
 ## 0.1.1-alpha · 17.10.2026 · erste Vorabversion (automatisches Release)
