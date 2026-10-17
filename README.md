@@ -1,13 +1,13 @@
 # DisAHRsterRadio
 
-> **Neuer Entwicklungsstand: WLAN ohne Passwort.** Zusätzliche WLAN-plus-BLE-UART-Testprofile verbinden ohne PIN; Standardprofile bleiben WLAN-only. [Zugang, Update und Abnahme](docs/OFFENER_ZUGANG.md). Frühere Releases/Flyer können noch Passwortzugänge beschreiben.
+> **Aktueller Stand:** offenes WLAN `DisAHRsterRadio-XXXXXX` → `http://192.168.4.1` bzw. `http://disahrster.local`. In Arbeit: schlankere Firmware, [Omi-Version (PR #14)](https://github.com/Pietwars/DisAHRsterRadio/pull/14) und [Solarbox](hardware/solarbox/) – siehe [In Arbeit](#in-arbeit). [Zugang, Update und Abnahme](docs/OFFENER_ZUGANG.md).
 
 
 **🔴 Live-Demo (simulierte Daten, kein Gerät nötig): https://pietwars.github.io/DisAHRsterRadio/**
 
 ![DisAHRsterRadio Ahrtal](docs/images/disahrsterradio-header.jpg)
 
-**Version 0.1.1-alpha** (Vorabversion) · disaster-radio/LoRaLayer2 + RadioLib 7 · Weboberfläche MeshAhrtal · 868 MHz · **Download:** [Releases](https://github.com/Pietwars/DisAHRsterRadio/releases) (ein Paket pro Board) · **Flyer (A5):** [Druck-PDF mit QR-Codes](docs/flyer/DisAHRsterRadio-Flyer.pdf) · [Digital-PDF mit klickbaren Links](docs/flyer/DisAHRsterRadio-Flyer-digital.pdf)
+**Version 0.1.1-alpha** (Vorabversion) · disaster-radio/LoRaLayer2 + RadioLib 7 · Weboberfläche MeshAhrtal · 868 MHz · **Download:** [Release v0.1.1-alpha](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.1.1-alpha) (ein Paket pro Board) · **Flyer (A5):** [Druck-PDF mit QR-Codes](docs/flyer/DisAHRsterRadio-Flyer.pdf) · [Digital-PDF mit klickbaren Links](docs/flyer/DisAHRsterRadio-Flyer-digital.pdf)
 
 **Offline-Chat über LoRa-Mesh für das Ahrtal** – ein Gerät spannt ein eigenes WLAN auf, man verbindet sich mit dem Handy und schreibt im Browser. Die Nachrichten laufen per LoRa von Gerät zu Gerät weiter, ganz ohne Internet oder Mobilfunk.
 
@@ -53,7 +53,7 @@ Haupt-Boards: LILYGO T3-S3 V1.3, LILYGO T3 V1.6.1 (TTGO), Heltec WiFi LoRa 32 V2
 | `t3-v161-sx1276` | LILYGO T3 V1.6.1 | SX1276 |
 | `heltec-v2-sx1276` | Heltec WiFi LoRa 32 V2 | SX1276 |
 
-Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nach LoRa/Display), WLAN-Sendeleistung 8,5 dBm (Variante `heltec-v2-sx1276-wifi11` mit 11 dBm), softAP auf Kanal 1 mit Prüfung und Neuversuch alle 5 s, LoRa-Sendepause während des WLAN-Starts, Startmarken `[BOOT …]` und alle 30 s WLAN-Name/offenen Zugang seriell und auf dem OLED.
+Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nach LoRa/Display), WLAN-Sendeleistung 8,5 dBm (Variante `heltec-v2-sx1276-wifi11` mit 11 dBm), softAP auf Kanal 1 mit Prüfung und Neuversuch alle 5 s, LoRa-Sendepause während des WLAN-Starts, Startmarken `[BOOT …]` und alle 30 s WLAN-Name und Adresse seriell und auf dem OLED.
 
 ## Was gegenüber disaster-radio modernisiert wurde
 
@@ -62,7 +62,7 @@ Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nac
 - **LoRaLayer2** (Routing von disaster-radio) liegt angepasst in `firmware/lib/LoRaLayer2` (Sende-/Empfangsleistung und SF zur Laufzeit, Konfigurationsausgabe auch für RadioLib)
 - **ESP32Async/ESPAsyncWebServer + AsyncTCP** (gepflegte Forks), **LittleFS** statt SPIFFS, AsyncSDServer entfernt (SD über ESPAsyncWebServer)
 - **EU868-Funkprofile:** Standard 869,618 MHz, 62,5 kHz, SF8, CR 4/8, 14 dBm, Sendezeit-Buchführung (10 %/h) – siehe [Funkprofile](#funkprofile-868-mhz-deutschland)
-- Offener WLAN-Zugangspunkt **`DisAHRsterRadio-XXXXXX`**, ohne Passwort; alte AP-Zugangsdaten werden beim Update entfernt.
+- Offener WLAN-Zugangspunkt **`DisAHRsterRadio-XXXXXX`** (`http://192.168.4.1`, `http://disahrster.local`, max. 4 Handys). ⚠️ Das WLAN ist offen und unverschlüsselt: Jede Person in Reichweite kann mitlesen und senden.
 - BLE-UART ohne PIN in den zusätzlichen `*-ble`-Testprofilen; WLAN bleibt parallel aktiv. Andere Partitionierung und noch keine Hardwareabnahme: [Anleitung](docs/OFFENER_ZUGANG.md).
 
 ## Funkprofile (868 MHz, Deutschland)
@@ -110,10 +110,12 @@ pip install platformio==6.2.0
 cd firmware
 pio run -e t3s3-sx1262 -t upload      # Firmware
 pio run -e t3s3-sx1262 -t uploadfs    # Weboberfläche (LittleFS)
-pio device monitor                     # zeigt WLAN-Name und offenen Zugang
+pio device monitor                     # zeigt WLAN-Name und Adresse
 ```
 
-Dann mit dem offenen WLAN `DisAHRsterRadio-XXXXXX` ohne Passwort verbinden und `http://192.168.4.1` öffnen. Betreiberkonsole nur über USB; Telnet ist deaktiviert.
+Dann mit dem WLAN `DisAHRsterRadio-XXXXXX` verbinden und `http://192.168.4.1` (oder `http://disahrster.local`) öffnen. Höchstens 4 Handys gleichzeitig. Betreiberkonsole nur über USB (Telnet entfernt).
+
+> ⚠️ Offenes, unverschlüsseltes WLAN: Jede Person in Reichweite kann mitlesen und senden.
 
 ## Fertige Flash-Pakete
 
@@ -126,6 +128,20 @@ Releases entstehen automatisch: Ein Tag `v<Version>` (passend zur Datei `VERSION
 DisAHRsterRadio ist der **gemeinsame Kern**; [HaldenFunk](https://github.com/Pietwars/HaldenFunk) ist die Regionalvariante fürs Mansfelder Land. HaldenFunk enthält keine eigene Kopie, die von Hand gepflegt wird: Alle Kern-Dateien (Firmware, Weboberfläche, Werkzeuge, Tests, Workflows) entstehen dort aus diesem Repository in einer festen Revision (`region/CORE`) plus einem kleinen Regional-Overlay (`region/overlay.patch`: Name, WLAN/mDNS, Begrüßung, Farben, Orte, Kartenliste, Demo-Inhalte, Paketpräfix). Rein regionale Dateien (README, Karten, Bilder, Doku, Flyer) stehen in `region/own.txt`. Die CI von HaldenFunk prüft mit `tools/core_sync.py --check`, dass nichts auseinanderläuft.
 
 **Ablauf:** Fehlerbehebungen und neue Funktionen hier umsetzen → in HaldenFunk `python3 tools/core_sync.py --update` (übernimmt den neuen Kern, wendet das Overlay an) → bauen, testen, committen. Details: [HaldenFunk/docs/KERN_UND_REGION.md](https://github.com/Pietwars/HaldenFunk/blob/main/docs/KERN_UND_REGION.md).
+
+## In Arbeit
+
+Noch nicht in `main` bzw. noch nicht getestet:
+
+- **Omi-Version** – Entwurf [PR #14](https://github.com/Pietwars/DisAHRsterRadio/pull/14): nur Ein/Aus, fester Displaytext, WLAN `Notfunk-XXXXXX`, die Seite öffnet sich beim Verbinden automatisch (Captive Portal), ein einziger Bildschirm mit Nachrichtenliste und „Senden“, Funkprofil fest EU Narrow, kompatibel mit normalen DisAHRsterRadio-Geräten. Noch nicht gemergt, noch nicht auf Hardware getestet.
+- **Schlankere Firmware** – aufgeräumte, verschlankte Firmware auf dem Branch [`slim/flash`](https://github.com/Pietwars/DisAHRsterRadio/tree/slim/flash), in Arbeit (noch kein Pull Request).
+- **Solarbox** – wetterfestes PETG-Gehäuse mit TPU-Dichtung für LILYGO T3-S3 + 3× 18650 + MPPT-Lader CN3791 + Solarpaneel 18 V / 10 W. STL-Dateien, CadQuery-Modell, Renders und Flyer: [hardware/solarbox/](hardware/solarbox/).
+  - Noch **nicht probegedruckt**.
+  - Das Paneel **nie direkt an das Board** anschließen: Der Solareingang des T3-S3 verträgt nur 4,5–5,6 V; immer über den MPPT-Lader.
+  - Li-Ion-Akkus werden unter 0 °C nicht geladen.
+  - **JST-PH-Polarität** vor dem Einstecken mit dem Multimeter prüfen (Kabelfarben sind nicht genormt).
+
+<img src="hardware/solarbox/renders/szene_disahrsterradio.png" width="420" alt="Solarbox mit DisAHRsterRadio (Render)">
 
 ## Bekannte Grenzen / offene Arbeit
 
