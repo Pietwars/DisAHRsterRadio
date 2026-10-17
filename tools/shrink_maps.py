@@ -43,9 +43,13 @@ def shrink(d, prof):
     q = d.get('q', 1)
     tol, g = prof['tol'], prof['grid']
     b = d.get('bbox') or d.get('view')
-    if not b:  # Grenzen aus den Daten bestimmen
-        xs = [l[1] for l in d['l']] + [p[2] for p in d.get('p', [])]; ys = [l[2] for l in d['l']] + [p[3] for p in d.get('p', [])]
-        b = [min(xs) * q / 1e5, min(ys) * q / 1e5, max(xs) * q / 1e5, max(ys) * q / 1e5]
+    if not b:  # Grenzen aus Orten/POIs und Linien ohne Gewässer bestimmen (wie tools/make_map.py)
+        xs, ys = [p[2] * q for p in d.get('p', [])], [p[3] * q for p in d.get('p', [])]
+        for l in d['l']:
+            if l[0] in ('w', 's', 'wa'): continue
+            x, y = l[1] * q, l[2] * q; xs.append(x); ys.append(y)
+            for i in range(3, len(l) - 1, 2): x += l[i] * q; y += l[i + 1] * q; xs.append(x); ys.append(y)
+        b = [min(xs) / 1e5, min(ys) / 1e5, max(xs) / 1e5, max(ys) / 1e5]
     m = 0.01; bb = [(b[0] - m) * 1e5, (b[1] - m) * 1e5, (b[2] + m) * 1e5, (b[3] + m) * 1e5]
     k = math.cos(math.radians((b[1] + b[3]) / 2)); mx = 1.113 * k; my = 1.113  # Meter je Einheit
     L = []
