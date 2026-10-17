@@ -134,7 +134,7 @@ DisAHRsterRadio ist der **gemeinsame Kern**; [HaldenFunk](https://github.com/Pie
 Noch nicht in `main` bzw. noch nicht getestet:
 
 - **Omi-Version** – Entwurf [PR #14](https://github.com/Pietwars/DisAHRsterRadio/pull/14): nur Ein/Aus, fester Displaytext, WLAN `Notfunk-XXXXXX`, die Seite öffnet sich beim Verbinden automatisch (Captive Portal), ein einziger Bildschirm mit Nachrichtenliste und „Senden“, Funkprofil fest EU Narrow, kompatibel mit normalen DisAHRsterRadio-Geräten. Noch nicht gemergt, noch nicht auf Hardware getestet.
-- **Schlankere Firmware** – aufgeräumte, verschlankte Firmware auf dem Branch [`slim/flash`](https://github.com/Pietwars/DisAHRsterRadio/tree/slim/flash), in Arbeit (noch kein Pull Request).
+- **Schlankere Firmware** – aufgeräumte, verschlankte Firmware auf dem Branch [`slim/flash`](https://github.com/Pietwars/DisAHRsterRadio/tree/slim/flash), [PR #16](https://github.com/Pietwars/DisAHRsterRadio/pull/16): ca. 28–38 KB weniger Flash je Board, Funktionen unverändert.
 - **Solarbox** – wetterfestes PETG-Gehäuse mit TPU-Dichtung für LILYGO T3-S3 + 3× 18650 + MPPT-Lader CN3791 + Solarpaneel 18 V / 10 W. STL-Dateien, CadQuery-Modell, Renders und Flyer: [hardware/solarbox/](hardware/solarbox/).
   - Noch **nicht probegedruckt**.
   - Das Paneel **nie direkt an das Board** anschließen: Der Solareingang des T3-S3 verträgt nur 4,5–5,6 V; immer über den MPPT-Lader.
