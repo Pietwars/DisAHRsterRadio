@@ -2,6 +2,8 @@
 
 ## 0.1.1-dev · Entwicklungsstand (kein Release)
 
+- Karten verkleinert mit `tools/shrink_maps.py` (aus HaldenFunk übernommen, Profil `ahrtal`): zusammen ca. 290 → 190 KB (Ahrtal 51 → 32 KB, Altenahr 47 → 24 KB, Dernau 60 → 33 KB, Heimersheim 97 → 82 KB, Sinzig 35 → 19 KB); Orte und POIs unverändert, Screenshot-Vergleich vorher/nachher geprüft.
+- Fehler behoben: Die Karten Dernau, Altenahr und Sinzig zeigten „Karte nicht verfügbar“, weil ihnen die Grenzen (bbox) fehlten; `make_map.py` und `shrink_maps.py` ergänzen sie jetzt aus den Daten. Neuer Test `tests/maps.test.py` in der CI.
 - **Zentrale Version (17.10.2026):** Datei `VERSION` ist die einzige Quelle; `tools/version.py` schreibt `DAR_VERSION` (config.h), Fußzeile „Weboberfläche DisAHRsterRadio …“ im Gerät-Reiter, Demo-Gerätedaten, README-Versionszeile; `--check` + `tests/version.test.py` laufen in CI. `tools/package.sh` und das Demo-Banner (`build_pages.py`) lesen `VERSION`.
 - Projektfamilie: gemeinsame Tabelle mit allen fünf Repositorys (DisasterMesh, DisAHRsterRadio-MeshCore, DisAHRsterRadio, HaldenFunk, HaldenFunk-MeshCore).
 - **Automatische Releases:** Workflow `release.yml` baut bei jedem Tag `v*` alle drei Boards, packt `…-factory.bin`, `teile/` (bootloader, partitions, boot_app0, firmware, littlefs), `SHA256SUMS` und deutsche `ANLEITUNG.md`, prüft alles mit `tools/verify_release.py` (bricht bei fehlender Datei/falscher Prüfsumme/fehlender Version ab) und veröffentlicht eine Vorabversion mit Text aus diesem CHANGELOG (`tools/release_notes.py`). Bei Änderungen an der Paketierung läuft derselbe Workflow im Pull Request als Probelauf ohne Veröffentlichung. Paketnamen jetzt mit Version: `DisAHRsterRadio-<Version>-<Board>.zip` (wie bei DisasterMesh und DisAHRsterRadio-MeshCore).

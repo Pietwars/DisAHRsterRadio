@@ -13,6 +13,8 @@ jobs:
           python-version: '3.12'
       - name: Versionsprüfung (VERSION ist die einzige Quelle)
         run: python tools/version.py --check && python tests/version.test.py
+      - name: Kartenprüfung
+        run: python tests/maps.test.py
   build:
     runs-on: ubuntu-latest
     strategy:

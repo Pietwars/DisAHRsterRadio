@@ -58,6 +58,13 @@ def conv(fn, name, keep_buildings):
         L.append(row)
     out = {'name': name, 'attr': d.get('attribution', '© OpenStreetMap contributors · ODbL 1.0'),
            'bbox': d.get('bbox'), 'view': d.get('viewBounds') or d.get('bbox'), 'l': L, 'p': P}
+    if not out['bbox']:  # GeoJSON ohne bbox: Grenzen aus Orten/POIs und Linien ohne Gewässer (Ahr/Bäche reichen weit über den Ausschnitt hinaus)
+        xs, ys = [p[2] for p in P], [p[3] for p in P]
+        for l in L:
+            if l[0] in ('w', 's', 'wa'): continue
+            x, y = l[1], l[2]; xs.append(x); ys.append(y)
+            for i in range(3, len(l) - 1, 2): x += l[i]; y += l[i + 1]; xs.append(x); ys.append(y)
+        out['bbox'] = out['view'] = [round(min(xs) / 1e5, 5), round(min(ys) / 1e5, 5), round(max(xs) / 1e5, 5), round(max(ys) / 1e5, 5)]
     raw = json.dumps(out, ensure_ascii=False, separators=(',', ':')).encode()
     os.makedirs(OUT, exist_ok=True)
     base = os.path.join(OUT, fn.replace('.geojson', '.json'))
