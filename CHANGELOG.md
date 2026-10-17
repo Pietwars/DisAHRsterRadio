@@ -1,6 +1,10 @@
 # Änderungen
 
-## 0.1.1-dev · Entwicklungsstand (kein Release)
+## 0.1.1-alpha · 17.10.2026 · erste Vorabversion (automatisches Release)
+
+- **Flyer 0.1.1-alpha** (Druck mit QR-Codes zu Download und Demo, digital mit klickbaren Links) mit dem neuen Generator `tools/flyer/flyer.py` (Konfiguration `tools/flyer/flyer.json`, Version aus `VERSION`); werden an das Release angehängt.
+- Version 0.1.1-alpha: erste veröffentlichte Vorabversion mit Paketen für LILYGO T3-S3, LILYGO T3 V1.6.1 und Heltec V2 (Hardware-Abnahme steht aus).
+- Gemeinsamer Kern: DisAHRsterRadio ist Kern für HaldenFunk (Overlay-Verfahren, siehe README); CI-Schritt „Kern-Abgleich“ läuft nur in Regionalvarianten (`region/CORE`).
 
 - Karten verkleinert mit `tools/shrink_maps.py` (aus HaldenFunk übernommen, Profil `ahrtal`): zusammen ca. 290 → 190 KB (Ahrtal 51 → 32 KB, Altenahr 47 → 24 KB, Dernau 60 → 33 KB, Heimersheim 97 → 82 KB, Sinzig 35 → 19 KB); Orte und POIs unverändert, Screenshot-Vergleich vorher/nachher geprüft.
 - Fehler behoben: Die Karten Dernau, Altenahr und Sinzig zeigten „Karte nicht verfügbar“, weil ihnen die Grenzen (bbox) fehlten; `make_map.py` und `shrink_maps.py` ergänzen sie jetzt aus den Daten. Neuer Test `tests/maps.test.py` in der CI.
