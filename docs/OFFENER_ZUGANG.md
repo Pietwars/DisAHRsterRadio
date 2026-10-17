@@ -1,22 +1,18 @@
-# Verbinden ohne Passwort
+# Verbinden
 
-Dieser Entwicklungsstand öffnet den lokalen WLAN-Zugang. Bestehende Releases und
-deren Flyer beschreiben teilweise noch den bisherigen Zugang mit Passwort.
-
-1. Gerät einschalten und am Handy `DisAHRsterRadio-XXXXXX` auswählen. Es wird kein WLAN-Passwort eingegeben.
+1. Gerät einschalten und am Handy das WLAN `DisAHRsterRadio-XXXXXX` auswählen.
 2. Bei „Kein Internet“ mit diesem WLAN verbunden bleiben.
-3. `http://192.168.4.1` öffnen. Chat, Karte und Meldungen brauchen kein Benutzerkonto.
+3. `http://192.168.4.1` (oder `http://disahrster.local`) öffnen. Chat, Karte und Meldungen brauchen kein Benutzerkonto.
 
 Der Zugangspunkt stellt lokale Kommunikation bereit, keinen Internetzugang.
 Das WLAN ist unverschlüsselt: Jede Person in Reichweite kann mitlesen und senden.
 Alle Nutzer teilen denselben Knoten und dessen Nachrichten. Höchstens 4 Handys je Gerät. Für öffentliche Kommunikation einen eigenen Knoten verwenden.
-Gespeicherte frühere AP-Passwörter werden beim Start entfernt; Nachrichten und
-Einstellungen (z. B. Funkprofil) bleiben erhalten.
+Beim Update bleiben Nachrichten und Einstellungen (z. B. Funkprofil) erhalten.
 
 ## LoRaLayer2: kombinierte WLAN-/BLE-Testprofile
 
 DisAHRsterRadio verwendet weiterhin ihre eigenen
-Funk- und Nachrichtenformate. Die Standardprofile öffnen WLAN ohne Passwort.
+Funk- und Nachrichtenformate. Die Standardprofile öffnen nur das WLAN.
 Die neuen Profile `t3s3-sx1262-ble`, `t3-v161-sx1276-ble` und
 `heltec-v2-sx1276-ble` aktivieren zusätzlich BLE-UART ohne PIN, gleichzeitig mit WLAN.
 Das ist kein MeshCore-Companion: Die MeshCore-App ist hierfür nicht kompatibel.
@@ -30,12 +26,12 @@ Diese kombinierten Profile nutzen `huge_app.csv` und eine andere Partitionierung
 Vor dem Wechsel Firmware und Daten sichern; vollständige Partitionstabelle,
 Anwendung und Dateisystem zusammen flashen. Kein reines App-Update über eine alte
 Partitionierung. WLAN-Standardprofile behalten ihre bisherige Partitionstabelle.
-Telnet auf Port 23 ist deaktiviert; die Betreiberkonsole bleibt über USB verfügbar.
+Telnet ist entfernt; die Betreiberkonsole bleibt über USB verfügbar.
 
 ## Abnahme vor Freigabe
 
-- Frisches Handy ohne gespeichertes WLAN/Kopplung: ohne Passwort/PIN verbinden.
-- Update eines vorhandenen Geräts mit bisherigem WLAN-Passwort/BLE-PIN:
+- Frisches Handy ohne gespeichertes WLAN/Kopplung: verbinden ohne Eingabe.
+- Update eines vorhandenen Geräts mit älterer Firmware:
   danach ebenfalls offen, Identität und Nachrichten bleiben erhalten.
 - Zwei Geräte: Chat und Brett in beide Richtungen, Neustart und Wiederverbindung.
 - iPhone und Android: WLAN ohne Internet beibehalten, Bluetooth neu koppeln (nur `*-ble`),
