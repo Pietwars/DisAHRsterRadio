@@ -1,5 +1,8 @@
 # DisAHRsterRadio
 
+> **Neuer Entwicklungsstand: WLAN ohne Passwort.** Zusätzliche WLAN-plus-BLE-UART-Testprofile verbinden ohne PIN; Standardprofile bleiben WLAN-only. [Zugang, Update und Abnahme](docs/OFFENER_ZUGANG.md). Frühere Releases/Flyer können noch Passwortzugänge beschreiben.
+
+
 **🔴 Live-Demo (simulierte Daten, kein Gerät nötig): https://pietwars.github.io/DisAHRsterRadio/**
 
 ![DisAHRsterRadio Ahrtal](docs/images/disahrsterradio-header.jpg)
@@ -50,7 +53,7 @@ Haupt-Boards: LILYGO T3-S3 V1.3, LILYGO T3 V1.6.1 (TTGO), Heltec WiFi LoRa 32 V2
 | `t3-v161-sx1276` | LILYGO T3 V1.6.1 | SX1276 |
 | `heltec-v2-sx1276` | Heltec WiFi LoRa 32 V2 | SX1276 |
 
-Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nach LoRa/Display), WLAN-Sendeleistung 8,5 dBm (Variante `heltec-v2-sx1276-wifi11` mit 11 dBm), softAP auf Kanal 1 mit Prüfung und Neuversuch alle 5 s, LoRa-Sendepause während des WLAN-Starts, Startmarken `[BOOT …]` und alle 30 s WLAN-Name/Passwort seriell und auf dem OLED.
+Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nach LoRa/Display), WLAN-Sendeleistung 8,5 dBm (Variante `heltec-v2-sx1276-wifi11` mit 11 dBm), softAP auf Kanal 1 mit Prüfung und Neuversuch alle 5 s, LoRa-Sendepause während des WLAN-Starts, Startmarken `[BOOT …]` und alle 30 s WLAN-Name/offenen Zugang seriell und auf dem OLED.
 
 ## Was gegenüber disaster-radio modernisiert wurde
 
@@ -59,8 +62,8 @@ Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nac
 - **LoRaLayer2** (Routing von disaster-radio) liegt angepasst in `firmware/lib/LoRaLayer2` (Sende-/Empfangsleistung und SF zur Laufzeit, Konfigurationsausgabe auch für RadioLib)
 - **ESP32Async/ESPAsyncWebServer + AsyncTCP** (gepflegte Forks), **LittleFS** statt SPIFFS, AsyncSDServer entfernt (SD über ESPAsyncWebServer)
 - **EU868-Funkprofile:** Standard 869,618 MHz, 62,5 kHz, SF8, CR 4/8, 14 dBm, Sendezeit-Buchführung (10 %/h) – siehe [Funkprofile](#funkprofile-868-mhz-deutschland)
-- WLAN-Zugangspunkt **`DisAHRsterRadio-XXXXXX`** mit **geräteindividuellem Zufallspasswort** (einmal erzeugt, im NVS gespeichert, beim Start seriell ausgegeben)
-- BLE-UART von disaster-radio ist vorerst deaktiviert (Bluedroid-API passt nicht zu Arduino-ESP32 3.x auf dem S3; Build-Flag `HAS_BLE`)
+- Offener WLAN-Zugangspunkt **`DisAHRsterRadio-XXXXXX`**, ohne Passwort; alte AP-Zugangsdaten werden beim Update entfernt.
+- BLE-UART ohne PIN in den zusätzlichen `*-ble`-Testprofilen; WLAN bleibt parallel aktiv. Andere Partitionierung und noch keine Hardwareabnahme: [Anleitung](docs/OFFENER_ZUGANG.md).
 
 ## Funkprofile (868 MHz, Deutschland)
 
@@ -107,10 +110,10 @@ pip install platformio==6.2.0
 cd firmware
 pio run -e t3s3-sx1262 -t upload      # Firmware
 pio run -e t3s3-sx1262 -t uploadfs    # Weboberfläche (LittleFS)
-pio device monitor                     # zeigt WLAN-Name und Passwort
+pio device monitor                     # zeigt WLAN-Name und offenen Zugang
 ```
 
-Dann mit dem WLAN `DisAHRsterRadio-XXXXXX` verbinden und `http://192.168.4.1` öffnen (oder `http://disahrster.local`). Seriell/Telnet (Port 23) gibt es weiterhin die disaster-radio-Konsole.
+Dann mit dem offenen WLAN `DisAHRsterRadio-XXXXXX` ohne Passwort verbinden und `http://192.168.4.1` öffnen. Betreiberkonsole nur über USB; Telnet ist deaktiviert.
 
 ## Fertige Flash-Pakete
 
