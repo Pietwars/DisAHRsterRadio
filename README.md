@@ -4,7 +4,7 @@
 
 ![DisAHRsterRadio Ahrtal](docs/images/disahrsterradio-header.jpg)
 
-**Version 0.1.1-dev** (Entwicklungsstand, kein Release) · disaster-radio/LoRaLayer2 + RadioLib 7 · Weboberfläche MeshAhrtal · 868 MHz · Firmware über [Actions](https://github.com/Pietwars/DisAHRsterRadio/actions) · **Flyer (A5):** [Druck-PDF mit QR-Codes](docs/flyer/DisAHRsterRadio-Flyer.pdf) · [Digital-PDF mit klickbaren Links](docs/flyer/DisAHRsterRadio-Flyer-digital.pdf)
+**Version 0.1.1-alpha** (Vorabversion) · disaster-radio/LoRaLayer2 + RadioLib 7 · Weboberfläche MeshAhrtal · 868 MHz · **Download:** [Releases](https://github.com/Pietwars/DisAHRsterRadio/releases) (ein Paket pro Board) · **Flyer (A5):** [Druck-PDF mit QR-Codes](docs/flyer/DisAHRsterRadio-Flyer.pdf) · [Digital-PDF mit klickbaren Links](docs/flyer/DisAHRsterRadio-Flyer-digital.pdf)
 
 **Offline-Chat über LoRa-Mesh für das Ahrtal** – ein Gerät spannt ein eigenes WLAN auf, man verbindet sich mit dem Handy und schreibt im Browser. Die Nachrichten laufen per LoRa von Gerät zu Gerät weiter, ganz ohne Internet oder Mobilfunk.
 
@@ -17,7 +17,7 @@ Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https
 |---|---|---|---|---|
 | [Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh) | Original-Repo: MeshCore 1.18 mit der großen Weboberfläche MeshAhrtal, Karten, Werkzeuge, Doku (Ahrtal) | MeshCore | 0.9.0-alpha | [Live-Demo](https://pietwars.github.io/DisasterMesh/demo/) · Firmware über [Actions](https://github.com/Pietwars/DisasterMesh/actions) · Flyer [Druck](https://pietwars.github.io/DisasterMesh/flyer/DisasterMesh-Flyer.pdf) / [digital](https://pietwars.github.io/DisasterMesh/flyer/DisasterMesh-Flyer-digital.pdf) |
 | [Pietwars/DisAHRsterRadio-MeshCore](https://github.com/Pietwars/DisAHRsterRadio-MeshCore) | MeshCore 1.18 mit kompakter MeshAhrtal-Oberfläche per WLAN plus Bluetooth für die MeshCore-App, 105 Geräte (Ahrtal) | MeshCore | 0.9.0-alpha | [Live-Demo](https://pietwars.github.io/DisAHRsterRadio-MeshCore/) · [Release v0.9.0-alpha](https://github.com/Pietwars/DisAHRsterRadio-MeshCore/releases/tag/v0.9.0-alpha) · Flyer [Druck](https://pietwars.github.io/DisAHRsterRadio-MeshCore/flyer/DisAHRsterRadio-MeshCore-Flyer.pdf) / [digital](https://pietwars.github.io/DisAHRsterRadio-MeshCore/flyer/DisAHRsterRadio-MeshCore-Flyer-digital.pdf) |
-| [Pietwars/DisAHRsterRadio](https://github.com/Pietwars/DisAHRsterRadio) | Ohne MeshCore: modernisiertes disaster-radio (LoRaLayer2, RadioLib) mit kompakter MeshAhrtal-Oberfläche (Ahrtal) | LoRaLayer2 | 0.1.1-dev | [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) · Firmware über [Actions](https://github.com/Pietwars/DisAHRsterRadio/actions) · Flyer [Druck](https://pietwars.github.io/DisAHRsterRadio/flyer/DisAHRsterRadio-Flyer.pdf) / [digital](https://pietwars.github.io/DisAHRsterRadio/flyer/DisAHRsterRadio-Flyer-digital.pdf) |
+| [Pietwars/DisAHRsterRadio](https://github.com/Pietwars/DisAHRsterRadio) | Ohne MeshCore: modernisiertes disaster-radio (LoRaLayer2, RadioLib) mit kompakter MeshAhrtal-Oberfläche (Ahrtal) | LoRaLayer2 | 0.1.1-alpha | [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) · [Release v0.1.1-alpha](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.1.1-alpha) · Flyer [Druck](https://pietwars.github.io/DisAHRsterRadio/flyer/DisAHRsterRadio-Flyer.pdf) / [digital](https://pietwars.github.io/DisAHRsterRadio/flyer/DisAHRsterRadio-Flyer-digital.pdf) |
 | [Pietwars/HaldenFunk](https://github.com/Pietwars/HaldenFunk) | Regionalvariante von DisAHRsterRadio für Sangerhausen / Mansfelder Land, ohne MeshCore | LoRaLayer2 | 0.1.1-alpha | [Live-Demo](https://pietwars.github.io/HaldenFunk/) · [Release v0.1.1-alpha](https://github.com/Pietwars/HaldenFunk/releases/tag/v0.1.1-alpha) · Flyer [Druck](https://pietwars.github.io/HaldenFunk/flyer/HaldenFunk-Flyer.pdf) / [digital](https://pietwars.github.io/HaldenFunk/flyer/HaldenFunk-Flyer-digital.pdf) |
 | [Pietwars/HaldenFunk-MeshCore](https://github.com/Pietwars/HaldenFunk-MeshCore) | Regionalvariante von DisAHRsterRadio-MeshCore für das Mansfelder Land: MeshCore 1.18, WLAN + Bluetooth, Gerätematrix | MeshCore | 0.1.0-alpha | [Live-Demo](https://pietwars.github.io/HaldenFunk-MeshCore/) · [Release v0.1.0-alpha](https://github.com/Pietwars/HaldenFunk-MeshCore/releases/tag/v0.1.0-alpha) · Flyer [Druck](https://pietwars.github.io/HaldenFunk-MeshCore/flyer/HaldenFunk-MeshCore-Flyer.pdf) / [digital](https://pietwars.github.io/HaldenFunk-MeshCore/flyer/HaldenFunk-MeshCore-Flyer-digital.pdf) |
 
@@ -70,7 +70,7 @@ Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nac
 | **Karte** | **Standort** | **Gerät** |
 | <img src="docs/images/funktion-map.jpg" width="230" alt="Karte"> | <img src="docs/images/funktion-loc.jpg" width="230" alt="Standort"> | <img src="docs/images/funktion-info.jpg" width="230" alt="Gerät"> |
 
-(Aufnahmen der [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) in Handygröße, Stand 0.1.1-dev; alle Daten simuliert.)
+(Aufnahmen der [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) in Handygröße, Stand 0.1.1-alpha; alle Daten simuliert.)
 
 - Chat an alle (disaster-radio-WebSocket `/ws`, Format `<ID 2 Byte>c|<Name> Text`, Zustellbestätigung ✓ = vom Gerät angenommen, *nicht* beim Empfänger)
 - Schnellmeldungen (Trinkwasser, Strom, Medikamente, Verletzt, Evakuierung, „Mir geht es gut“, Hilfe-Angebote)
@@ -85,7 +85,7 @@ Die MeshCore-spezifischen Funktionen aus DisasterMesh (Kanäle, Direktnachrichte
 ## Erste Schritte
 
 ```bash
-pip install platformio
+pip install platformio==6.2.0
 cd firmware
 pio run -e t3s3-sx1262 -t upload      # Firmware
 pio run -e t3s3-sx1262 -t uploadfs    # Weboberfläche (LittleFS)
@@ -96,7 +96,15 @@ Dann mit dem WLAN `DisAHRsterRadio-XXXXXX` verbinden und `http://192.168.4.1` ö
 
 ## Fertige Flash-Pakete
 
-`tools/package.sh` baut je Board ein ZIP mit `factory.bin` (ab 0x0), Einzelteilen, `SHA256SUMS` und `ANLEITUNG.md` (esptool-js, Update nur `firmware.bin` an 0x10000).
+Fertige Pakete gibt es unter [Releases](https://github.com/Pietwars/DisAHRsterRadio/releases): je Board `DisAHRsterRadio-<Version>-<Board>.zip` mit `…-factory.bin` (komplett an 0x0, z. B. mit https://espressif.github.io/esptool-js/), Einzelteilen unter `teile/`, `SHA256SUMS` und deutscher `ANLEITUNG.md`. Update ohne Datenverlust: nur `teile/firmware.bin` an 0x10000.
+
+Releases entstehen automatisch: Ein Tag `v<Version>` (passend zur Datei `VERSION`) startet den Workflow `release.yml`, der alle drei Boards baut, mit `tools/package.sh` packt, mit `tools/verify_release.py` prüft (bricht ab, wenn eine Datei fehlt, leer ist oder eine Prüfsumme nicht stimmt) und als Vorabversion veröffentlicht. Plattform und Bibliotheken sind fest gepinnt (`firmware/platformio.ini`), PlatformIO in der CI auf 6.2.0.
+
+## Gemeinsamer Kern mit HaldenFunk
+
+DisAHRsterRadio ist der **gemeinsame Kern**; [HaldenFunk](https://github.com/Pietwars/HaldenFunk) ist die Regionalvariante fürs Mansfelder Land. HaldenFunk enthält keine eigene Kopie, die von Hand gepflegt wird: Alle Kern-Dateien (Firmware, Weboberfläche, Werkzeuge, Tests, Workflows) entstehen dort aus diesem Repository in einer festen Revision (`region/CORE`) plus einem kleinen Regional-Overlay (`region/overlay.patch`: Name, WLAN/mDNS, Begrüßung, Farben, Orte, Kartenliste, Demo-Inhalte, Paketpräfix). Rein regionale Dateien (README, Karten, Bilder, Doku, Flyer) stehen in `region/own.txt`. Die CI von HaldenFunk prüft mit `tools/core_sync.py --check`, dass nichts auseinanderläuft.
+
+**Ablauf:** Fehlerbehebungen und neue Funktionen hier umsetzen → in HaldenFunk `python3 tools/core_sync.py --update` (übernimmt den neuen Kern, wendet das Overlay an) → bauen, testen, committen. Details: [HaldenFunk/docs/KERN_UND_REGION.md](https://github.com/Pietwars/HaldenFunk/blob/main/docs/KERN_UND_REGION.md).
 
 ## Bekannte Grenzen / offene Arbeit
 
