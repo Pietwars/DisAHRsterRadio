@@ -2,6 +2,9 @@
 
 ## 0.1.1-alpha · 17.10.2026 · erste Vorabversion (automatisches Release)
 
+- **Funkprofile für 868 MHz (17.10.2026):** neuer Standard **EU Narrow 869,618 MHz, 62,5 kHz, SF8, CR 4/8** (vorher 869,525 MHz, 125 kHz, SF9, CR 4/5 – jetzt Profil „Mittel“). Wählbar: Nah/Schnell (BW 250, SF7), Mittel (BW 125, SF9), Fern (BW 125, SF12, CR 4/8), LongFast-ähnlich (BW 250, SF11), alle im Teilband 869,4–869,65 MHz. Auswahl im Gerät-Reiter (NVS, Neustart), `/set preset N`, `GET /api/presets`, `POST /api/preset`. **Achtung:** Geräte mit älterer Firmware funken auf „Mittel“ – entweder alle aktualisieren oder alle auf „Mittel“ stellen.
+- **Sendezeit-Buchführung:** gleitende Stunde (60 × 1 min) aus RadioLib `getTimeOnAir()`, Pakete warten, wenn das 10-%-Budget erreicht ist; ersetzt die feste Airtime-Formel (SF/BW125/CR5) in `LoRaLayer2.cpp`. `/api/info` und Gerät-Reiter zeigen Profil, Bandbreite, Coderate, Sendezeit der letzten Stunde und zurückgehaltene Pakete.
+- **Funkchip-Einstellungen:** Coderate aus Profil, CRC an, explizite Kopfzeile, LDRO automatisch, SX1262 boosted RX gain, Strombegrenzung 140 mA (SX1262) / 120 mA (SX1276), Sendeleistung auf Chipgrenze begrenzt (Standard 14 dBm unverändert). RadioLib 7.8.1 (aktuell). `/set sf` und `/set lorafrq` sind durch `/set preset` ersetzt.
 - **Flyer 0.1.1-alpha** (Druck mit QR-Codes zu Download und Demo, digital mit klickbaren Links) mit dem neuen Generator `tools/flyer/flyer.py` (Konfiguration `tools/flyer/flyer.json`, Version aus `VERSION`); werden an das Release angehängt.
 - Version 0.1.1-alpha: erste veröffentlichte Vorabversion mit Paketen für LILYGO T3-S3, LILYGO T3 V1.6.1 und Heltec V2 (Hardware-Abnahme steht aus).
 - Gemeinsamer Kern: DisAHRsterRadio ist Kern für HaldenFunk (Overlay-Verfahren, siehe README); CI-Schritt „Kern-Abgleich“ läuft nur in Regionalvarianten (`region/CORE`).
