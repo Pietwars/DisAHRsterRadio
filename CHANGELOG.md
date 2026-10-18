@@ -2,6 +2,8 @@
 
 ## 0.9.1 · 18.10.2026 · Release
 
+- **Flyer 0.9.1 (nachgereicht):** Druck-PDF (QR-Code zum Release v0.9.1 und zur Demo) und Digital-PDF (klickbare Links) neu erzeugt, mit Vorschau der aktuellen Weboberfläche; Inhalt und Boards entsprechen dem Release.
+
 Versionsangleich der Projektfamilie auf 0.9.1 (Sprung von 0.1.1-alpha). Firmware-Funktionen unverändert bis auf die Punkte unten (offener Zugang); Firmwarekennung `0.9.1`.
 
 - Release-Paket vorerst nur für **Heltec WiFi LoRa 32 V2** (`release.yml`); T3-S3 und T3 V1.6.1 bleiben im Code und im CI. Den LILYGO T-Deck Plus unterstützt diese Firmware nicht.
