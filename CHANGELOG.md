@@ -1,6 +1,14 @@
 # Änderungen
 
-## Unveröffentlicht – offener Zugang
+## 0.9.1 · 18.10.2026 · Release
+
+Versionsangleich der Projektfamilie auf 0.9.1 (Sprung von 0.1.1-alpha). Firmware-Funktionen unverändert bis auf die Punkte unten (offener Zugang); Firmwarekennung `0.9.1`.
+
+- Release-Paket vorerst nur für **Heltec WiFi LoRa 32 V2** (`release.yml`); T3-S3 und T3 V1.6.1 bleiben im Code und im CI. Den LILYGO T-Deck Plus unterstützt diese Firmware nicht.
+- README, Projektfamilie und README-Bilder (aus der Live-Demo neu aufgenommen) auf 0.9.1.
+- Auf echter Hardware ist diese Firmware in 0.9.1 nicht abgenommen (getestet wurde 0.9.1 nur bei DisAHRsterRadio-MeshCore).
+
+### Offener Zugang (seit 0.1.1-alpha)
 
 - Offenes WLAN ohne Passwort, auch bei bestehenden Installationen.
 - Telnet (Port 23) deaktiviert, Konfiguration über USB; kombinierte WLAN+BLE-UART-Testprofile (`*-ble`, ohne PIN) ergänzt.
