@@ -7,12 +7,49 @@
  "title_html": "Dis<span>AHR</span>sterRadio",
  "subtitle": "Offline-Mesh-Messenger fürs Ahrtal · @VERSION@",
  "intro": "<b>Wenn Internet und Mobilfunk ausfallen, bleibt das Ahrtal in Kontakt.</b> DisAHRsterRadio baut auf dem Projekt <b>disaster-radio</b> auf (ohne MeshCore): LoRa-Funkboards reichen Nachrichten von Knoten zu Knoten weiter. Das Handy verbindet sich per WLAN mit dem Board, die Bedienung läuft im Browser.",
- "features": ["Chat über das LoRa-Mesh", "Schnellmeldung: Hilfe/OK mit einem Tipp", "Schwarzes Brett für Aushänge", "Offline-Karte ohne Internet", "Standort teilen", "Basiert auf disaster-radio, Open Source"],
- "steps": ["Firmware aus dem Release auf das LoRa-Board flashen, Antenne und Strom anschließen.", "Handy mit dem WLAN <b>DisAHRsterRadio-XXXXXX</b> verbinden (offenes WLAN).", "Im Browser <b>192.168.4.1</b> öffnen – chatten, melden, Karte nutzen."],
+ "features": [
+  "Chat über das LoRa-Mesh",
+  "Schnellmeldung: Hilfe/OK mit einem Tipp",
+  "Schwarzes Brett für Aushänge",
+  "Offline-Karte und Standort teilen",
+  "Firmware im Release: Heltec V2",
+  "Basiert auf disaster-radio, Open Source"
+ ],
+ "steps": [
+  "Firmware aus dem Release v@VERSION@ auf den Heltec V2 flashen, Antenne und Strom anschließen.",
+  "Handy mit dem WLAN <b>DisAHRsterRadio-XXXXXX</b> verbinden (offenes WLAN).",
+  "Im Browser <b>192.168.4.1</b> öffnen – chatten, melden, Karte nutzen."
+ ],
  "repo": "https://github.com/Pietwars/DisAHRsterRadio",
- "extra_urls": [["Download", "https://github.com/Pietwars/DisAHRsterRadio/releases"], ["Live-Demo", "https://pietwars.github.io/DisAHRsterRadio/"]],
- "links": [["Repository", "https://github.com/Pietwars/DisAHRsterRadio"], ["Release v@VERSION@", "@RELEASE@"], ["Live-Demo", "https://pietwars.github.io/DisAHRsterRadio/"], ["Projektseite", "https://pietwars.github.io/DisasterMesh/"]],
- "qr_url": "https://github.com/Pietwars/DisAHRsterRadio/releases",
- "qr_label": "Download",
+ "extra_urls": [
+  [
+   "Release v@VERSION@",
+   "@RELEASE@"
+  ],
+  [
+   "Live-Demo",
+   "https://pietwars.github.io/DisAHRsterRadio/"
+  ]
+ ],
+ "links": [
+  [
+   "Repository",
+   "https://github.com/Pietwars/DisAHRsterRadio"
+  ],
+  [
+   "Release v@VERSION@",
+   "@RELEASE@"
+  ],
+  [
+   "Live-Demo",
+   "https://pietwars.github.io/DisAHRsterRadio/"
+  ],
+  [
+   "Projektseite",
+   "https://pietwars.github.io/DisasterMesh/"
+  ]
+ ],
+ "qr_url": "@RELEASE@",
+ "qr_label": "Release v@VERSION@",
  "demo": "https://pietwars.github.io/DisAHRsterRadio/"
 }
