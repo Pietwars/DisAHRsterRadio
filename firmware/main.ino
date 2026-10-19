@@ -42,6 +42,9 @@ XPowersAXP2101 pmu;
 #include "client/WebSocketClient.h"
 #include "client/GPSClient.h"
 #include "client/BoardClient.h"
+#ifdef TDECK_SCREEN
+#include "client/TDeckUI.h"
+#endif
 #include "client/BleUartClient.h"
 
 // middleware
@@ -104,6 +107,9 @@ Layer1Class *Layer1_main = NULL;
 DisasterRadio *radio = new DisasterRadio();
 DisasterHistory *history = NULL;
 BoardClient *board = NULL;
+#ifdef TDECK_SCREEN
+TDeckUI tdeckUI;
+#endif
 
 int internal_clients = 0;
 int clients = 0;
@@ -682,6 +688,10 @@ void setup()
   setupSerial();
   board = new BoardClient(fsInitialized ? (fs::FS *)&LittleFS : NULL);
   radio->connect(board);
+#ifdef TDECK_SCREEN
+  tdeckUI.attachBoard(board);
+  radio->connect(&tdeckUI);
+#endif
 #ifndef WIFI_LATE
   // HTTP und WebSocket erst nach SD/LittleFS und History starten.
   // serveStatic() benoetigt ein bereits eingebundenes Dateisystem.
@@ -694,6 +704,11 @@ void setup()
   setupLoRa();
   bootMark("Display");
   setupDisplay();
+#ifdef TDECK_SCREEN
+  bootMark("TDeck Display");
+  tdeckUI.beginDisplay();
+  if (history) history->replay(&tdeckUI);
+#endif
   setupGPS();
 #ifdef WIFI_LATE
   // WLAN zuletzt, mit Pause nach dem Funkmodul (Stromspitzen entzerren)

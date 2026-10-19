@@ -8,18 +8,19 @@
 <img src="docs/images/vorschau-karte.jpg" width="250" alt="MeshAhrtal: Offlinekarte">
 </p>
 
-<sub>Aufnahmen der [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) in Handygröße, Stand 0.9.3; alle Daten simuliert.</sub>
+<sub>Aufnahmen der [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) in Handygröße, Stand 0.9.4; alle Daten simuliert.</sub>
 
-**Version 0.9.3** · disaster-radio/LoRaLayer2 + RadioLib 7 · Weboberfläche MeshAhrtal · 868 MHz
+**Version 0.9.4** · disaster-radio/LoRaLayer2 + RadioLib 7 · Weboberfläche MeshAhrtal · 868 MHz
 
 [![Release](https://img.shields.io/github/v/release/Pietwars/DisAHRsterRadio?label=Release)](https://github.com/Pietwars/DisAHRsterRadio/releases/latest)
 [![Live-Demo](https://img.shields.io/badge/Live--Demo-online-2ea44f)](https://pietwars.github.io/DisAHRsterRadio/)
-[![Flyer](https://img.shields.io/badge/Flyer-PDF-blue)](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.3)
+[![Flyer](https://img.shields.io/badge/Flyer-PDF-blue)](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.4)
 
-Flyer (A5): [Druck-PDF mit QR-Codes](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.3) · [Digital-PDF mit Links](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.3)
+Flyer (A5): [Druck-PDF mit QR-Codes](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.4) · [Digital-PDF mit Links](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.4)
 
 ## Was kann es
 
+- **T-Deck Plus Standalone:** lokale Oberfläche mit Bootlogo, Tastatur, ruhigem Trackball, Touch und gespeicherter Touch-Kalibrierung; WLAN bleibt zusätzlich verfügbar.
 - **Chat an alle** im Browser – ohne App, ohne Internet (Chat reicht ein Funk-Sprung weit)
 - **Schnellmeldungen:** Trinkwasser, Strom, Medikamente, Verletzt, Evakuierung, „Mir geht es gut“, Hilfe-Angebote
 - **Schwarzes Brett:** Aushänge werden auf jedem Gerät gespeichert (bis 30) und über mehrere Geräte weitergereicht
@@ -29,17 +30,21 @@ Flyer (A5): [Druck-PDF mit QR-Codes](https://github.com/Pietwars/DisAHRsterRadio
 
 ## Unterstützte Geräte
 
-| Board | Paket im [Release v0.9.3](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.3) | Stand |
+| Board | Paket im [Release v0.9.4](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.4) | Stand |
 |---|---|---|
-| LILYGO T-Deck Plus (ESP32-S3, SX1262, 868 MHz) | `DisAHRsterRadio-0.9.3-tdeck.zip` | baut und ist automatisch geprüft (Flash-/Speicherprüfung im CI); auf Hardware noch nicht abgenommen |
-| LILYGO T-Watch S3 (ESP32-S3, SX1262, 868 MHz) | `DisAHRsterRadio-0.9.3-twatch-s3.zip` | baut und ist automatisch geprüft (Flash-/Speicherprüfung im CI); auf Hardware noch nicht abgenommen |
+| LILYGO T-Deck Plus **Standalone** | `DisAHRsterRadio-0.9.4-tdeck-standalone.zip` | Start, lokale Bedienung, Tastatur, Trackball, Touch und Hilfen vom Nutzer bestätigt; GPS/Karte draußen und umfassender Funk-/Dauertest noch offen |
+| LILYGO T-Deck Plus (ESP32-S3, SX1262, 868 MHz) | `DisAHRsterRadio-0.9.4-tdeck.zip` | baut und ist automatisch geprüft (Flash-/Speicherprüfung im CI); auf Hardware noch nicht abgenommen |
+| LILYGO T-Watch S3 (ESP32-S3, SX1262, 868 MHz) | `DisAHRsterRadio-0.9.4-twatch-s3.zip` | baut und ist automatisch geprüft (Flash-/Speicherprüfung im CI); auf Hardware noch nicht abgenommen |
 
-Das Display bleibt auf beiden Geräten vorerst dunkel (noch kein Display-Treiber); die Bedienung läuft über das WLAN im Browser. Andere Boards sind nicht mehr im Release; ältere Releases bleiben unverändert – siehe [Details](docs/DETAILS.md#unterstützte-boards).
+**Standalone:** Das T-Deck-Plus-Paket `tdeck-standalone` wird direkt am Gerät bedient: Chat, Hilfe, Brett, schematische GPS-Ortsübersicht und SETUP. Beim ersten Start drei Zielkreuze und den Kontrollpunkt antippen; die Ausrichtung wird gespeichert. Wiederholen unter SETUP → Touch neu kalibrieren.
+
+Die zusätzlichen Pakete `tdeck` und `twatch-s3` bleiben WLAN-Varianten mit dunklem Display. [Release v0.9.3](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.3) bleibt unverändert verfügbar. Andere Boards sind nicht mehr im Release; ältere Releases bleiben unverändert – siehe [Details](docs/DETAILS.md#unterstützte-boards).
 
 ## Schnellstart
 
-1. **Flashen:** ZIP aus dem [Release](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.3) entpacken und `DisAHRsterRadio-0.9.3-tdeck-factory.bin` bzw. `DisAHRsterRadio-0.9.3-twatch-s3-factory.bin` an Adresse **0x0** schreiben (z. B. mit [esptool-js](https://espressif.github.io/esptool-js/)). Update ohne Datenverlust: nur `teile/firmware.bin` an 0x10000.
-2. **Verbinden:** Handy mit dem offenen WLAN `DisAHRsterRadio-XXXXXX` verbinden, **http://192.168.4.1** (oder http://disahrster.local) öffnen – kein Passwort, höchstens 4 Handys.
+1. **Flashen:** ZIP aus dem [Release](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.4) entpacken und für die lokale T-Deck-Bedienung `DisAHRsterRadio-0.9.4-tdeck-standalone-factory.bin` wählen; alternativ WLAN-Pakete `DisAHRsterRadio-0.9.4-tdeck-factory.bin` bzw. `DisAHRsterRadio-0.9.4-twatch-s3-factory.bin` an Adresse **0x0** schreiben (z. B. mit [esptool-js](https://espressif.github.io/esptool-js/)). Update ohne Datenverlust: nur `teile/firmware.bin` an 0x10000.
+2. **Standalone:** T-Deck direkt mit Tastatur, Trackball und Touch bedienen. Die lokale Karte ist schematisch; die OSM-Webkarten bleiben im Browser.
+3. **Zusätzlich verbinden:** Handy mit dem offenen WLAN `DisAHRsterRadio-XXXXXX` verbinden, **http://192.168.4.1** (oder http://disahrster.local) öffnen – kein Passwort, höchstens 4 Handys.
 
 Keine MeshCore-App: Diese Firmware nutzt LoRaLayer2 (Bluetooth nur in separaten `*-ble`-Testprofilen). Mehr: [Offener Zugang](docs/OFFENER_ZUGANG.md)
 
@@ -53,7 +58,7 @@ Standardprofil **EU Narrow: 869,618 MHz**, 62,5 kHz, SF8, CR 4/8, 14 dBm (SRD-Te
 | Repository | Inhalt | Funk | Version | Demo · Download · Flyer |
 |---|---|---|---|---|
 | [Pietwars/DisAHRsterRadio-MeshCore](https://github.com/Pietwars/DisAHRsterRadio-MeshCore) | MeshCore 1.18 mit kompakter MeshAhrtal-Oberfläche per WLAN plus Bluetooth für die MeshCore-App; Firmware für LILYGO T-Deck Plus und T-Watch S3 (Ahrtal) | MeshCore | 0.9.4 | [Live-Demo](https://pietwars.github.io/DisAHRsterRadio-MeshCore/) · [Release v0.9.4](https://github.com/Pietwars/DisAHRsterRadio-MeshCore/releases/tag/v0.9.4) · Flyer [Druck](https://pietwars.github.io/DisAHRsterRadio-MeshCore/flyer/DisAHRsterRadio-MeshCore-Flyer.pdf) / [digital](https://pietwars.github.io/DisAHRsterRadio-MeshCore/flyer/DisAHRsterRadio-MeshCore-Flyer-digital.pdf) |
-| [Pietwars/DisAHRsterRadio](https://github.com/Pietwars/DisAHRsterRadio) | Ohne MeshCore: modernisiertes disaster-radio (LoRaLayer2, RadioLib) mit kompakter MeshAhrtal-Oberfläche; Firmware für LILYGO T-Deck Plus und T-Watch S3 (Ahrtal) | LoRaLayer2 | 0.9.3 | [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) · [Release v0.9.3](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.3) · Flyer [Druck](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.3) / [digital](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.3) |
+| [Pietwars/DisAHRsterRadio](https://github.com/Pietwars/DisAHRsterRadio) | Ohne MeshCore: modernisiertes disaster-radio (LoRaLayer2, RadioLib) mit kompakter MeshAhrtal-Oberfläche; Firmware für LILYGO T-Deck Plus und T-Watch S3 (Ahrtal) | LoRaLayer2 | 0.9.4 | [Live-Demo](https://pietwars.github.io/DisAHRsterRadio/) · [Release v0.9.4](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.4) · Flyer [Druck](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.4) / [digital](https://github.com/Pietwars/DisAHRsterRadio/releases/tag/v0.9.4) |
 | [Pietwars/HaldenFunk](https://github.com/Pietwars/HaldenFunk) | Regionalvariante von DisAHRsterRadio für Sangerhausen / Mansfelder Land, ohne MeshCore; Firmware für LILYGO T-Deck Plus und T-Watch S3 | LoRaLayer2 | 0.9.3 | [Live-Demo](https://pietwars.github.io/HaldenFunk/) · [Release v0.9.3](https://github.com/Pietwars/HaldenFunk/releases/tag/v0.9.3) · Flyer [Druck](https://github.com/Pietwars/HaldenFunk/releases/tag/v0.9.3) / [digital](https://github.com/Pietwars/HaldenFunk/releases/tag/v0.9.3) |
 | [Pietwars/HaldenFunk-MeshCore](https://github.com/Pietwars/HaldenFunk-MeshCore) | Regionalvariante von DisAHRsterRadio-MeshCore für das Mansfelder Land: MeshCore 1.18, WLAN + Bluetooth; Firmware für LILYGO T-Deck Plus und T-Watch S3 | MeshCore | 0.9.2 | [Live-Demo](https://pietwars.github.io/HaldenFunk-MeshCore/) · [Release v0.9.2](https://github.com/Pietwars/HaldenFunk-MeshCore/releases/tag/v0.9.2) · Flyer [Druck](https://pietwars.github.io/HaldenFunk-MeshCore/flyer/HaldenFunk-MeshCore-Flyer.pdf) / [digital](https://pietwars.github.io/HaldenFunk-MeshCore/flyer/HaldenFunk-MeshCore-Flyer-digital.pdf) |
 

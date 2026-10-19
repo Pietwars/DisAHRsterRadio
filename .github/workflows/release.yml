@@ -28,7 +28,7 @@ jobs:
       fail-fast: true
       matrix:
         # Release-Boards: LILYGO T-Deck Plus und LILYGO T-Watch S3 (Heltec V2 und T3-Boards nicht mehr im Release; ältere Releases unverändert)
-        env: [tdeck-sx1262, twatch-s3-sx1262]
+        env: [tdeck-sx1262, twatch-s3-sx1262, tdeck-standalone]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -63,7 +63,7 @@ jobs:
       - name: Pakete prüfen (Vollständigkeit, Prüfsummen, Version)
         run: |
           V=$(python3 tools/version.py --get)
-          python3 tools/verify_release.py dist DisAHRsterRadio "$V" littlefs.bin tdeck twatch-s3
+          python3 tools/verify_release.py dist DisAHRsterRadio "$V" littlefs.bin tdeck twatch-s3 tdeck-standalone
           (cd dist && sha256sum *.zip > SHA256SUMS-DisAHRsterRadio-$V.txt)
       - name: Flyer zur Tag-Version neu erzeugen
         run: |
@@ -78,7 +78,8 @@ jobs:
       - name: Release-Text erzeugen
         run: |
           python3 tools/release_notes.py "$(python3 tools/version.py --get)" "${{ github.repository }}" DisAHRsterRadio \
-            "tdeck=LILYGO T-Deck Plus (SX1262)" "twatch-s3=LILYGO T-Watch S3 (SX1262)" | tee notes.md
+            "tdeck=LILYGO T-Deck Plus (WLAN)" "twatch-s3=LILYGO T-Watch S3 (WLAN)" \
+            "tdeck-standalone=LILYGO T-Deck Plus Standalone (Display, Tastatur, Trackball, Touch)" | tee notes.md
       - name: Release veröffentlichen
         if: env.TAG != ''
         env:
@@ -87,7 +88,8 @@ jobs:
           ASSETS="dist/*.zip dist/SHA256SUMS-*.txt"
           for f in docs/flyer/*-Flyer.pdf docs/flyer/*-Flyer-digital.pdf; do [ -f "$f" ] && ASSETS="$ASSETS $f"; done
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" $ASSETS --clobber
+            echo "Release $TAG existiert bereits; vorhandene Assets bleiben unveraendert."
+            exit 0
           else
             case "$TAG" in *-*) gh release create "$TAG" --prerelease --verify-tag --title "DisAHRsterRadio $TAG (Vorabversion)" --notes-file notes.md $ASSETS;;
               *) gh release create "$TAG" --verify-tag --title "DisAHRsterRadio $TAG" --notes-file notes.md $ASSETS;; esac
