@@ -5,7 +5,7 @@
 #if defined(LILYGO_TDECK) && defined(TDECK_SCREEN)
 
 #include <Arduino.h>
-#include <Adafruit_ST7789.h>
+#include <TFT_eSPI.h>
 #include <TinyGPS++.h>
 #include <Wire.h>
 #include "BoardClient.h"
@@ -19,7 +19,7 @@ public:
   void receive(struct Datagram datagram, size_t len) override;
 private:
   enum Page : uint8_t { CHAT = 0, QUICK = 1, BOARD = 2, MAP = 3 };
-  Adafruit_ST7789 lcd_{BOARD_TFT_CS, BOARD_TFT_DC, -1};
+  TFT_eSPI lcd_;
   HardwareSerial gnss_{1};
   TinyGPSPlus gps_;
   BoardClient *board_ = nullptr;
