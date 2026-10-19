@@ -1,0 +1,46 @@
+name: T-Deck Plus Display-Test
+on:
+  pull_request:
+    paths:
+      - 'firmware/**'
+      - 'tools/package.sh'
+      - '.github/workflows/tdeck-screen-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tdeck-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install platformio==6.2.0 esptool==5.6.0
+      - name: Quellstand, Hardwareprofil und Speicherbudget pruefen
+        run: |
+          python3 tools/version.py --check
+          python3 tests/memory_validation.test.py -v
+      - name: Display-Testfirmware und LittleFS bauen und als Factory-Paket packen
+        env:
+          NAMEPREFIX: DisAHRsterRadio-Display-Test
+          ENVS: tdeck-screen-test
+        run: tools/package.sh dist
+      - name: ZIP und Inhalte verifizieren
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          p=next(Path('dist').glob('DisAHRsterRadio-Display-Test-*-tdeck-screen-test.zip'))
+          with zipfile.ZipFile(p) as z:
+              names=z.namelist()
+              for x in ('-factory.bin','/teile/firmware.bin','/teile/littlefs.bin','/SHA256SUMS','/ANLEITUNG.md'):
+                  assert any(n.endswith(x) for n in names), x
+              print(f'OK: {p} ({p.stat().st_size} bytes)')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TDeck-Display-Test-Firmware
+          path: dist/DisAHRsterRadio-Display-Test-*-tdeck-screen-test.zip
+          if-no-files-found: error
