@@ -31,6 +31,10 @@ Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https
 | `t3s3-sx1262` | LILYGO T3-S3 (Hauptziel) | SX1262 (TCXO 1,8 V) |
 | `t3-v161-sx1276` | LILYGO T3 V1.6.1 | SX1276 |
 | `heltec-v2-sx1276` | Heltec WiFi LoRa 32 V2 | SX1276 |
+| `tdeck-sx1262` | LILYGO T-Deck Plus (Release ab dem nächsten Release, ohne Display-Treiber) | SX1262 (TCXO 1,8 V, DIO2 kein RF-Schalter) |
+| `twatch-s3-sx1262` | LILYGO T-Watch S3 (Release ab dem nächsten Release, ohne Display-Treiber) | SX1262 (TCXO 1,8 V), LoRa-Versorgung über AXP2101 |
+
+Seit der T-Deck/T-Watch-Anpassung baut das CI nur noch `tdeck-sx1262` und `twatch-s3-sx1262`; die übrigen Profile bleiben in `firmware/platformio.ini`. T-Deck Plus: Peripherie-Versorgung (GPIO 10) an, TFT- und SD-Chip-Select inaktiv, Hintergrundbeleuchtung aus. T-Watch S3: AXP2101 schaltet ALDO3/ALDO4 (LoRa) ein, Display und Vibration aus. Pins nach den MeshCore-Varianten `lilygo_tdeck` und `lilygo_twatch_s3` (Upstream-PR #2799), nicht auf Hardware gemessen.
 
 Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nach LoRa/Display), WLAN-Sendeleistung 8,5 dBm (Variante `heltec-v2-sx1276-wifi11` mit 11 dBm), softAP auf Kanal 1 mit Prüfung und Neuversuch alle 5 s, LoRa-Sendepause während des WLAN-Starts, Startmarken `[BOOT …]` und alle 30 s WLAN-Name und Adresse seriell und auf dem OLED.
 
@@ -98,9 +102,9 @@ Dann mit dem WLAN `DisAHRsterRadio-XXXXXX` verbinden und `http://192.168.4.1` (o
 
 ## Fertige Flash-Pakete
 
-Fertige Pakete gibt es unter [Releases](https://github.com/Pietwars/DisAHRsterRadio/releases). Ab 0.9.1 enthält das Release vorerst nur das Paket für **Heltec WiFi LoRa 32 V2** (`DisAHRsterRadio-<Version>-heltec-v2.zip`); T3-S3 und T3 V1.6.1 bleiben im Code und im CI. Jedes Paket enthält `…-factory.bin` (komplett an 0x0, z. B. mit https://espressif.github.io/esptool-js/), Einzelteile unter `teile/`, `SHA256SUMS` und deutscher `ANLEITUNG.md`. Update ohne Datenverlust: nur `teile/firmware.bin` an 0x10000.
+Fertige Pakete gibt es unter [Releases](https://github.com/Pietwars/DisAHRsterRadio/releases). Release v0.9.1 enthält nur das Paket für **Heltec WiFi LoRa 32 V2**. Ab dem nächsten Release: **LILYGO T-Deck Plus** (`DisAHRsterRadio-<Version>-tdeck.zip`) und **LILYGO T-Watch S3** (`DisAHRsterRadio-<Version>-twatch-s3.zip`). Jedes Paket enthält `…-factory.bin` (komplett an 0x0, z. B. mit https://espressif.github.io/esptool-js/), Einzelteile unter `teile/`, `SHA256SUMS` und deutscher `ANLEITUNG.md`. Update ohne Datenverlust: nur `teile/firmware.bin` an 0x10000.
 
-Releases entstehen automatisch: Ein Tag `v<Version>` (passend zur Datei `VERSION`) startet den Workflow `release.yml`, der die Release-Boards (vorerst Heltec V2) baut, mit `tools/package.sh` packt, mit `tools/verify_release.py` prüft (bricht ab, wenn eine Datei fehlt, leer ist oder eine Prüfsumme nicht stimmt) und veröffentlicht (Versionen mit Zusatz wie `-alpha` als Vorabversion). Plattform und Bibliotheken sind fest gepinnt (`firmware/platformio.ini`), PlatformIO in der CI auf 6.2.0.
+Releases entstehen automatisch: Ein Tag `v<Version>` (passend zur Datei `VERSION`) startet den Workflow `release.yml`, der die Release-Boards (T-Deck Plus, T-Watch S3) baut, mit `tools/package.sh` packt, mit `tools/verify_release.py` prüft (bricht ab, wenn eine Datei fehlt, leer ist oder eine Prüfsumme nicht stimmt) und veröffentlicht (Versionen mit Zusatz wie `-alpha` als Vorabversion). Plattform und Bibliotheken sind fest gepinnt (`firmware/platformio.ini`), PlatformIO in der CI auf 6.2.0.
 
 ## Gemeinsamer Kern mit HaldenFunk
 

@@ -68,5 +68,25 @@
     "app_offset": 65536,
     "partition_offset": 32768,
     "boot_offset": 4096
+  },
+  "TDeck_Plus": {
+    "env": "tdeck-sx1262",
+    "chip": "esp32s3",
+    "chip_id": 9,
+    "flash_bytes": 16777216,
+    "ram_bytes": 327680,
+    "app_offset": 65536,
+    "partition_offset": 32768,
+    "boot_offset": 0
+  },
+  "TWatch_S3": {
+    "env": "twatch-s3-sx1262",
+    "chip": "esp32s3",
+    "chip_id": 9,
+    "flash_bytes": 16777216,
+    "ram_bytes": 327680,
+    "app_offset": 65536,
+    "partition_offset": 32768,
+    "boot_offset": 0
   }
 }

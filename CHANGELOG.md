@@ -2,6 +2,13 @@
 
 ## Unveröffentlicht (nach 0.9.1)
 
+- **Neue Boards LILYGO T-Deck Plus und LILYGO T-Watch S3** (ESP32-S3, SX1262; Profile `tdeck-sx1262`, `twatch-s3-sx1262`). Minimale Anpassung der bestehenden Firmware, kein Umbau:
+  - Pins in `config.h` nach den MeshCore-Varianten.
+  - Neue Funktion `setupBoardPower()`: T-Deck-Peripherie-Pin, TFT/SD-Chip-Select, T-Watch-AXP2101 über XPowersLib 0.2.9.
+  - `LORA_DIO2_RF_SWITCH` (T-Deck: aus).
+  - 16-MB-Flash-Header, gleiche Partitionstabelle `custompart.csv`.
+  - Kein Display-Treiber: Das Display bleibt dunkel, Bedienung über WLAN.
+- **Release und CI nur noch für T-Deck Plus und T-Watch S3** (`release.yml`, `build.yml`, `tools/package.sh` Standard). Heltec V2, T3-S3 und T3 V1.6.1 werden nicht mehr gebaut; die Profile bleiben im Code, das Release v0.9.1 bleibt unverändert.
 - **Flash- und Speicherprüfung im CI** (aus DisAHRsterRadio-MeshCore 0.9.4, angepasst an LittleFS und die Boards hier): `tools/validate_memory.py` prüft nach jedem Firmware-Build Image-Header (Chip-ID, Flashgröße), Segmente und Prüfsumme/SHA-256, Partitionstabelle (MD5, Überlappung, Grenzen), dass `firmware.bin` und `littlefs.bin` in ihre Partitionen passen, und die Linker-Werte für Flash und statisches RAM. Boardvertrag `tools/memory_boards.json` (T3-S3 und T3 V1.6.1: 4 MiB, Heltec V2: 8 MiB Flash, davon 4 MiB partitioniert). Bericht `speicherbericht.md/json` im Job Summary und im Artefakt; Hosttests `tests/memory_validation.test.py`. Firmware unverändert.
 
 ## 0.9.1 · 18.10.2026 · Release

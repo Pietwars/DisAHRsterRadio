@@ -33,7 +33,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env: [t3s3-sx1262, t3-v161-sx1276, heltec-v2-sx1276, heltec-v2-sx1276-wifi11, t3s3-sx1262-ble, t3-v161-sx1276-ble, heltec-v2-sx1276-ble]
+        # Nur noch LILYGO T-Deck Plus und LILYGO T-Watch S3; die alten Profile (T3-S3, T3 V1.6.1, Heltec V2) bleiben in
+        # firmware/platformio.ini, werden aber nicht mehr gebaut.
+        env: [tdeck-sx1262, twatch-s3-sx1262]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
