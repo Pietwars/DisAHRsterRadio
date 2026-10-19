@@ -11,11 +11,11 @@ VERSION=$(python3 "$ROOT/tools/version.py" --get)   # zentrale Versionsquelle: D
 COMMIT=$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unbekannt)
 ENVS=${ENVS:-"tdeck-sx1262 twatch-s3-sx1262"}
 mkdir -p "$OUT"
-declare -A CHIP=([tdeck-sx1262]=esp32s3 [twatch-s3-sx1262]=esp32s3 [t3s3-sx1262]=esp32s3 [t3-v161-sx1276]=esp32 [heltec-v2-sx1276]=esp32)
-declare -A BOOT=([tdeck-sx1262]=0x0 [twatch-s3-sx1262]=0x0 [t3s3-sx1262]=0x0 [t3-v161-sx1276]=0x1000 [heltec-v2-sx1276]=0x1000)
-declare -A FLASH=([tdeck-sx1262]=16MB [twatch-s3-sx1262]=16MB [t3s3-sx1262]=4MB [t3-v161-sx1276]=4MB [heltec-v2-sx1276]=4MB)
-declare -A NAME=([tdeck-sx1262]="LILYGO T-Deck Plus (SX1262)" [twatch-s3-sx1262]="LILYGO T-Watch S3 (SX1262)" [t3s3-sx1262]="LILYGO T3-S3 (SX1262)" [t3-v161-sx1276]="LILYGO T3 V1.6.1 (SX1276)" [heltec-v2-sx1276]="Heltec WiFi LoRa 32 V2 (SX1276)")
-declare -A ZIP=([tdeck-sx1262]=tdeck [twatch-s3-sx1262]=twatch-s3 [t3s3-sx1262]=t3s3 [t3-v161-sx1276]=t3-v161 [heltec-v2-sx1276]=heltec-v2)
+declare -A CHIP=([tdeck-sx1262]=esp32s3 [tdeck-screen-test]=esp32s3 [twatch-s3-sx1262]=esp32s3 [t3s3-sx1262]=esp32s3 [t3-v161-sx1276]=esp32 [heltec-v2-sx1276]=esp32)
+declare -A BOOT=([tdeck-sx1262]=0x0 [tdeck-screen-test]=0x0 [twatch-s3-sx1262]=0x0 [t3s3-sx1262]=0x0 [t3-v161-sx1276]=0x1000 [heltec-v2-sx1276]=0x1000)
+declare -A FLASH=([tdeck-sx1262]=16MB [tdeck-screen-test]=16MB [twatch-s3-sx1262]=16MB [t3s3-sx1262]=4MB [t3-v161-sx1276]=4MB [heltec-v2-sx1276]=4MB)
+declare -A NAME=([tdeck-sx1262]="LILYGO T-Deck Plus (SX1262)" [tdeck-screen-test]="LILYGO T-Deck Plus (Display-Test)" [twatch-s3-sx1262]="LILYGO T-Watch S3 (SX1262)" [t3s3-sx1262]="LILYGO T3-S3 (SX1262)" [t3-v161-sx1276]="LILYGO T3 V1.6.1 (SX1276)" [heltec-v2-sx1276]="Heltec WiFi LoRa 32 V2 (SX1276)")
+declare -A ZIP=([tdeck-sx1262]=tdeck [tdeck-screen-test]=tdeck-screen-test [twatch-s3-sx1262]=twatch-s3 [t3s3-sx1262]=t3s3 [t3-v161-sx1276]=t3-v161 [heltec-v2-sx1276]=heltec-v2)
 for env in $ENVS; do
   # buildfs und der Firmware-Build leeren jeweils das Build-Verzeichnis -> Ergebnisse nach jedem Schritt sichern
   Z=$VERSION-${ZIP[$env]}; P=$NAMEPREFIX-$Z
