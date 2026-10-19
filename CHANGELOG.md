@@ -1,5 +1,15 @@
 # Änderungen
 
+## 0.9.4 · 19.10.2026 · T-Deck Plus Standalone
+
+- Neues zusätzliches Release-Paket `tdeck-standalone`: lokale Seiten für Chat, Hilfe, Brett, schematische GPS-Ortsübersicht und SETUP. WLAN-Oberfläche bleibt parallel verfügbar.
+- Vorhandenes Tal-und-Funk-Startbild, Tastaturabfrage, impulsbasierter Trackball mit Totzone/Schrittbegrenzung und Klick ohne Haltewiederholung.
+- GT911-Touch und geführte Erststart-Kalibrierung: drei Ziele plus Kontrollpunkt, Speicherung in eigenem NVS-Namensraum; wiederholbar im SETUP-Menü.
+- TFT_eSPI-SPI-Registerfix für den beobachteten StoreProhibited-Absturz; nur eine geprüfte Zeile der gepinnten Bibliothek wird angepasst.
+- Teststand auf Nutzergerät bestätigt: Start, lokale Bedienung, Tastatur, Trackball, Touch und Hilfen. GPS/Karte im Freien und umfassende Funk-/Dauertests noch offen. Kein vollständiger OSM-Renderer auf dem TFT.
+- CI prüft Eingabesequenzen, Kalibriertransformation, Versionen und Speicher; Standalone-ZIP enthält passende ELF/Map und Hash-Metadaten.
+- README, Geräteübersicht, Flash-/Bedienanleitung und Release-/Flyer-Hinweise aktualisiert. v0.9.3 bleibt unverändert verfügbar. LoRaLayer2 bleibt eigenständig, ohne MeshCore-Kompatibilität.
+
 ## 0.9.3 · 19.10.2026 · LittleFS-/Webserver-Hotfix
 
 - **Weboberfläche beim Start:** Auf T-Deck Plus und T-Watch S3 wird SD/LittleFS vor dem WLAN-/HTTP-Server initialisiert. Dadurch kann `serveStatic()` die Weboberfläche beim ersten Boot registrieren (Fix aus PR #26).

@@ -25,7 +25,7 @@ def collect(build, output):
         "elf_sha256": digest,
         "firmware_sha256": hashlib.sha256(image).hexdigest(),
         "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),
-        "environment": "tdeck-screen-test",
+        "environment": build.name,
         "note": "ELF hash must match the panic log before decoding addresses",
     }
     (output / "build.json").write_text(json.dumps(report, indent=2) + "\n")

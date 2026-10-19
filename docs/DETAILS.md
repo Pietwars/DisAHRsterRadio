@@ -14,7 +14,9 @@ Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https
 
 > ⚠️ **Wichtig:** DisAHRsterRadio ist **kein zertifiziertes Notrufsystem** und ersetzt keine Behörden-Kommunikation. In Lebensgefahr immer **112** wählen, wenn irgendwie möglich.
 
-## Ehrlicher Stand (Oktober 2026)
+## Ehrlicher Stand (0.9.4, Oktober 2026)
+
+Neu: T-Deck Plus **Standalone** mit eigenständiger lokaler Oberfläche, Bootlogo, Tastatur, Trackball und Touch-Kalibrierung. Diese Bedienung wurde vom Nutzer auf dem Gerät bestätigt. GPS/Karte draußen und umfassende Funk-/Dauertests sind noch offen. Die folgenden älteren Board-Hinweise sind keine pauschale Freigabe weiterer Hardware.
 
 | Punkt | Stand |
 |---|---|
@@ -31,10 +33,11 @@ Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https
 | `t3s3-sx1262` | LILYGO T3-S3 (Hauptziel) | SX1262 (TCXO 1,8 V) |
 | `t3-v161-sx1276` | LILYGO T3 V1.6.1 | SX1276 |
 | `heltec-v2-sx1276` | Heltec WiFi LoRa 32 V2 | SX1276 |
+| `tdeck-standalone` | LILYGO T-Deck Plus mit lokaler Oberfläche ab 0.9.4 | SX1262 |
 | `tdeck-sx1262` | LILYGO T-Deck Plus (im Release ab 0.9.2, ohne Display-Treiber) | SX1262 (TCXO 1,8 V, DIO2 kein RF-Schalter) |
 | `twatch-s3-sx1262` | LILYGO T-Watch S3 (im Release ab 0.9.2, ohne Display-Treiber) | SX1262 (TCXO 1,8 V), LoRa-Versorgung über AXP2101 |
 
-Seit der T-Deck/T-Watch-Anpassung baut das CI nur noch `tdeck-sx1262` und `twatch-s3-sx1262`; die übrigen Profile bleiben in `firmware/platformio.ini`. T-Deck Plus: Peripherie-Versorgung (GPIO 10) an, TFT- und SD-Chip-Select inaktiv, Hintergrundbeleuchtung aus. T-Watch S3: AXP2101 schaltet ALDO3/ALDO4 (LoRa) ein, Display und Vibration aus. Pins nach den MeshCore-Varianten `lilygo_tdeck` und `lilygo_twatch_s3` (Upstream-PR #2799), nicht auf Hardware gemessen.
+Ab 0.9.4 baut die CI `tdeck-standalone`, `tdeck-sx1262` und `twatch-s3-sx1262`; die übrigen Profile bleiben in `firmware/platformio.ini`. Die folgenden Display-aus-Hinweise gelten für das WLAN-Profil `tdeck-sx1262`, nicht für Standalone. T-Deck Plus: Peripherie-Versorgung (GPIO 10) an, TFT- und SD-Chip-Select inaktiv, Hintergrundbeleuchtung aus. T-Watch S3: AXP2101 schaltet ALDO3/ALDO4 (LoRa) ein, Display und Vibration aus. Pins nach den MeshCore-Varianten `lilygo_tdeck` und `lilygo_twatch_s3` (Upstream-PR #2799), nicht auf Hardware gemessen.
 
 Heltec V2 (WLAN-Fix): Brownout-Detektor früh aus, WLAN startet zuletzt (2 s nach LoRa/Display), WLAN-Sendeleistung 8,5 dBm (Variante `heltec-v2-sx1276-wifi11` mit 11 dBm), softAP auf Kanal 1 mit Prüfung und Neuversuch alle 5 s, LoRa-Sendepause während des WLAN-Starts, Startmarken `[BOOT …]` und alle 30 s WLAN-Name und Adresse seriell und auf dem OLED.
 
@@ -101,6 +104,8 @@ Dann mit dem WLAN `DisAHRsterRadio-XXXXXX` verbinden und `http://192.168.4.1` (o
 > ⚠️ Offenes, unverschlüsseltes WLAN: Jede Person in Reichweite kann mitlesen und senden.
 
 ## Fertige Flash-Pakete
+
+Neu ab 0.9.4: `DisAHRsterRadio-<Version>-tdeck-standalone.zip` mit lokaler Bedienung. WLAN-Pakete bleiben zusätzlich verfügbar, v0.9.3 bleibt erhalten.
 
 Fertige Pakete gibt es unter [Releases](https://github.com/Pietwars/DisAHRsterRadio/releases). Ab Release v0.9.2 nur noch **LILYGO T-Deck Plus** (`DisAHRsterRadio-<Version>-tdeck.zip`) und **LILYGO T-Watch S3** (`DisAHRsterRadio-<Version>-twatch-s3.zip`). Jedes Paket enthält `…-factory.bin` (komplett an 0x0, z. B. mit https://espressif.github.io/esptool-js/), Einzelteile unter `teile/`, `SHA256SUMS` und deutscher `ANLEITUNG.md`. Update ohne Datenverlust: nur `teile/firmware.bin` an 0x10000.
 

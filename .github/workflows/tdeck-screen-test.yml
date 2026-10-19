@@ -43,7 +43,7 @@ jobs:
           with zipfile.ZipFile(p) as z:
               names=z.namelist()
               for x in ('-factory.bin','/teile/firmware.bin','/teile/littlefs.bin','/SHA256SUMS','/ANLEITUNG.md',
-                        '/debug/firmware.elf','/debug/firmware.map','/debug/build.json','/DISPLAY-TEST.md'):
+                        '/debug/firmware.elf','/debug/firmware.map','/debug/build.json','/TDECK-BEDIENUNG.md'):
                   assert any(n.endswith(x) for n in names), x
               import hashlib, json
               read=lambda suffix: z.read(next(n for n in names if n.endswith(suffix)))

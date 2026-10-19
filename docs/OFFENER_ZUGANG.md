@@ -1,5 +1,8 @@
 # Verbinden
 
+Ab 0.9.4 kann `tdeck-standalone` direkt über Display, Tastatur, Trackball und Touch bedient werden. WLAN bleibt als zusätzlicher Zugang bestehen. Die WiFi-only-Pakete `tdeck` und `twatch-s3` verwenden weiterhin den Browser.
+
+
 1. Gerät einschalten und am Handy das WLAN `DisAHRsterRadio-XXXXXX` auswählen.
 2. Bei „Kein Internet“ mit diesem WLAN verbunden bleiben.
 3. `http://192.168.4.1` (oder `http://disahrster.local`) öffnen. Chat, Karte und Meldungen brauchen kein Benutzerkonto.

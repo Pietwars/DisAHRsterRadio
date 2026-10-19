@@ -1,7 +1,8 @@
-# T-Deck Plus Display-Test: Crashanalyse und Wiederherstellung
+# T-Deck Plus Standalone 0.9.4: Bedienung, Crashanalyse und Wiederherstellung
 
-Nur fuer PR #28 / `feature/tdeck-local-display-mvp`, Profil `tdeck-screen-test`.
-Kein Stable-Release, kein automatischer Merge, keine Aenderung an v0.9.3-Tags.
+Releaseprofil `tdeck-standalone`; Entwicklungsprofil `tdeck-screen-test`.
+Version 0.9.4 wird als zusätzliches Release veröffentlicht. v0.9.3 bleibt unverändert.
+Start, lokale Bedienung und Hilfen sind vom Nutzer bestätigt; GPS/Karte im Freien und umfassende Funk-/Dauertests stehen noch aus.
 
 ## Bedienfix nach erfolgreichem Geraetestart
 
@@ -100,8 +101,8 @@ eine neue Partition beheben den falschen TFT-Registerzugriff nicht.
 
 1. Einstellungen und benoetigte Brettdaten sichern. Bei Bedarf zuerst ein
    vollstaendiges 16-MB-Flash-Backup lesen (siehe unten). Antenne anschliessen.
-2. Nur das ZIP **TDeck-Display-Test-Firmware** aus dem erfolgreichen, neuen
-   PR-#28-Lauf laden. `debug/build.json` nennt Commit und ELF-Hash. Pruefsummen
+2. Das ZIP **DisAHRsterRadio-0.9.4-tdeck-standalone.zip** aus dem neuen
+   Release laden; Entwicklungsstände nur aus dem zugehörigen erfolgreichen CI-Lauf. `debug/build.json` nennt Commit und ELF-Hash. Pruefsummen
    gegen `SHA256SUMS` vergleichen. Das alte ZIP mit ELF-Praefix `3b320a93f`
    enthaelt den Fehler.
 3. Bei unveraenderter Partitionstabelle vorzugsweise nur `teile/firmware.bin`
@@ -117,8 +118,7 @@ eine neue Partition beheben den falschen TFT-Registerzugriff nicht.
    GPS im Freien testen. Anschliessend mindestens 30 Minuten Parallelbetrieb;
    Heap-Minimum und neue Reset-/Panic-Zeilen festhalten.
 6. Bei Fehler den gesamten Log einschliesslich Guru-Meditation und Registerdump,
-   ZIP/CI-Lauf und `debug/build.json` aufheben. Kein automatischer Merge nach
-   einem erfolgreichen Build; Hardwareabnahme ist weiterhin offen.
+   ZIP/CI-Lauf und `debug/build.json` aufheben. Die bestätigte lokale Bedienung ersetzt keinen Funk-/Dauertest oder GPS-Test im Freien.
 
 ## Recovery ohne Erase Flash
 

@@ -6,19 +6,19 @@
  "gui_caption": "MeshAhrtal",
  "title_html": "Dis<span>AHR</span>sterRadio",
  "subtitle": "Offline-Mesh-Messenger fürs Ahrtal · @VERSION@",
- "intro": "<b>Wenn Internet und Mobilfunk ausfallen, bleibt das Ahrtal in Kontakt.</b> DisAHRsterRadio baut auf dem Projekt <b>disaster-radio</b> auf (ohne MeshCore): LoRa-Funkboards reichen Nachrichten von Knoten zu Knoten weiter. Das Handy verbindet sich per WLAN mit dem Board, die Bedienung läuft im Browser.",
+ "intro": "DisAHRsterRadio verbindet Geräte im Ahrtal über LoRaLayer2, ohne MeshCore. T-Deck Plus Standalone wird direkt mit Display, Tastatur, Trackball und Touch bedient; WLAN und Browser bleiben zusätzlich verfügbar.",
  "features": [
-  "Chat über das LoRa-Mesh",
-  "Schnellmeldung: Hilfe/OK mit einem Tipp",
+  "Chat über LoRaLayer2",
+  "Schnellhilfen mit Zweifachbestätigung am T-Deck",
   "Schwarzes Brett für Aushänge",
-  "Offline-Karte und Standort teilen",
+  "Schematische GPS-Übersicht lokal; OSM-Karten im Browser",
   "Firmware: T-Deck Plus, T-Watch S3",
   "Basiert auf disaster-radio, Open Source"
  ],
  "steps": [
   "Firmware aus dem Release v@VERSION@ auf T-Deck Plus oder T-Watch S3 flashen, Antenne und Strom anschließen.",
-  "Handy mit dem WLAN <b>DisAHRsterRadio-XXXXXX</b> verbinden (offenes WLAN).",
-  "Im Browser <b>192.168.4.1</b> öffnen – chatten, melden, Karte nutzen."
+  "Standalone: am T-Deck die Touch-Kalibrierung abschließen und direkt bedienen.",
+  "Zusätzlich: Handy ins WLAN DisAHRsterRadio-XXXXXX, Browser 192.168.4.1."
  ],
  "repo": "https://github.com/Pietwars/DisAHRsterRadio",
  "extra_urls": [

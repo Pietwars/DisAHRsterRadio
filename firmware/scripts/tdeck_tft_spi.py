@@ -26,7 +26,7 @@ def patch_header(path):
 
 if __name__ != "__main__":
     Import("env")
-    if env["PIOENV"] != "tdeck-screen-test":
-        raise RuntimeError("TFT workaround is restricted to tdeck-screen-test")
+    if env["PIOENV"] not in ("tdeck-screen-test", "tdeck-standalone"):
+        raise RuntimeError("TFT workaround is restricted to the T-Deck display profiles")
     patch_header(Path(env.subst("$PROJECT_LIBDEPS_DIR/$PIOENV")) /
                  "TFT_eSPI/Processors/TFT_eSPI_ESP32_S3.h")

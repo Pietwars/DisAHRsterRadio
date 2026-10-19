@@ -5,5 +5,5 @@
 Each pixel is RGB565, little endian. Size: 136320 bytes. The landscape display
 places it at (0, 13), preserving the entire image without cropping.
 
-Only `tdeck-screen-test` embeds this asset. The startup renderer copies one
+Only `tdeck-standalone` and `tdeck-screen-test` embed this asset. The startup renderer copies one
 640-byte row at a time, avoiding a full-screen RAM allocation.
