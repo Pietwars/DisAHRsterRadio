@@ -16,13 +16,19 @@ permissions:
   contents: write
 env:
   TAG: ${{ github.event.inputs.tag || (startsWith(github.ref, 'refs/tags/') && github.ref_name) || '' }}
+# Überholte Läufe abbrechen: Ein neuer Push auf denselben PR bzw. Nicht-main-Branch bricht den älteren Lauf ab.
+# main, Tags und manuelle Läufe bekommen je eine eigene Gruppe (run_id) und werden nie abgebrochen oder verdrängt.
+concurrency:
+  group: ${{ github.workflow }}-${{ (github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number)) || (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main' && github.ref) || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main') }}
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
-        env: [t3s3-sx1262, t3-v161-sx1276, heltec-v2-sx1276]
+        # Release-Boards: LILYGO T-Deck Plus und LILYGO T-Watch S3 (Heltec V2 und T3-Boards nicht mehr im Release; ältere Releases unverändert)
+        env: [tdeck-sx1262, twatch-s3-sx1262, tdeck-standalone]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,13 +63,24 @@ jobs:
       - name: Pakete prüfen (Vollständigkeit, Prüfsummen, Version)
         run: |
           V=$(python3 tools/version.py --get)
-          python3 tools/verify_release.py dist DisAHRsterRadio "$V" littlefs.bin t3s3 t3-v161 heltec-v2
+          python3 tools/verify_release.py dist DisAHRsterRadio "$V" littlefs.bin tdeck twatch-s3 tdeck-standalone
           (cd dist && sha256sum *.zip > SHA256SUMS-DisAHRsterRadio-$V.txt)
+      - name: Flyer zur Tag-Version neu erzeugen
+        run: |
+          python3 -m pip install 'qrcode[pil]'
+          python3 tools/flyer/flyer.py
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ('DisAHRsterRadio-Flyer.pdf', 'DisAHRsterRadio-Flyer-digital.pdf'):
+              path = Path('docs/flyer') / name
+              assert path.is_file() and path.stat().st_size > 10000 and path.open('rb').read(5) == b'%PDF-', name
+          PY
       - name: Release-Text erzeugen
         run: |
           python3 tools/release_notes.py "$(python3 tools/version.py --get)" "${{ github.repository }}" DisAHRsterRadio \
-            "t3s3=LILYGO T3-S3 V1.3 (SX1262)" "t3-v161=LILYGO T3 V1.6.1 (SX1276)" "heltec-v2=Heltec WiFi LoRa 32 V2 (SX1276)" | tee notes.md
-      - name: Vorabversion veröffentlichen
+            "tdeck=LILYGO T-Deck Plus (WLAN)" "twatch-s3=LILYGO T-Watch S3 (WLAN)" \
+            "tdeck-standalone=LILYGO T-Deck Plus Standalone (Display, Tastatur, Trackball, Touch)" | tee notes.md
+      - name: Release veröffentlichen
         if: env.TAG != ''
         env:
           GH_TOKEN: ${{ github.token }}
@@ -71,8 +88,10 @@ jobs:
           ASSETS="dist/*.zip dist/SHA256SUMS-*.txt"
           for f in docs/flyer/*-Flyer.pdf docs/flyer/*-Flyer-digital.pdf; do [ -f "$f" ] && ASSETS="$ASSETS $f"; done
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" $ASSETS --clobber
+            echo "Release $TAG existiert bereits; vorhandene Assets bleiben unveraendert."
+            exit 0
           else
-            gh release create "$TAG" --prerelease --verify-tag --title "DisAHRsterRadio $TAG (Vorabversion)" --notes-file notes.md $ASSETS
+            case "$TAG" in *-*) gh release create "$TAG" --prerelease --verify-tag --title "DisAHRsterRadio $TAG (Vorabversion)" --notes-file notes.md $ASSETS;;
+              *) gh release create "$TAG" --verify-tag --title "DisAHRsterRadio $TAG" --notes-file notes.md $ASSETS;; esac
           fi
           gh release view "$TAG" --json assets --jq '.assets[].name'

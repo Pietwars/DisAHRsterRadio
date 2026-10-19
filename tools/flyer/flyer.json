@@ -1,15 +1,51 @@
 {
  "name": "DisAHRsterRadio",
  "hero": "docs/images/disahrsterradio-header.jpg",
+ "gui": "docs/images/funktion-chat.jpg",
+ "extra_css": ".hero{height:29mm}.phone img{height:42mm}",
+ "gui_caption": "MeshAhrtal",
  "title_html": "Dis<span>AHR</span>sterRadio",
  "subtitle": "Offline-Mesh-Messenger fürs Ahrtal · @VERSION@",
- "intro": "<b>Wenn Internet und Mobilfunk ausfallen, bleibt das Ahrtal in Kontakt.</b> DisAHRsterRadio baut auf dem Projekt <b>disaster-radio</b> auf (ohne MeshCore): LoRa-Funkboards reichen Nachrichten von Knoten zu Knoten weiter. Das Handy verbindet sich per WLAN mit dem Board, die Bedienung läuft im Browser.",
- "features": ["Chat über das LoRa-Mesh", "Schnellmeldung: Hilfe/OK mit einem Tipp", "Schwarzes Brett für Aushänge", "Offline-Karte ohne Internet", "Standort teilen", "Basiert auf disaster-radio, Open Source"],
- "steps": ["Firmware aus dem Release auf das LoRa-Board flashen, Antenne und Strom anschließen.", "Handy mit dem WLAN <b>DisAHRsterRadio-XXXXXX</b> verbinden (offenes WLAN).", "Im Browser <b>192.168.4.1</b> öffnen – chatten, melden, Karte nutzen."],
+ "intro": "DisAHRsterRadio verbindet Geräte im Ahrtal über LoRaLayer2, ohne MeshCore. T-Deck Plus Standalone wird direkt mit Display, Tastatur, Trackball und Touch bedient; WLAN und Browser bleiben zusätzlich verfügbar.",
+ "features": [
+  "Chat über LoRaLayer2",
+  "Schnellhilfen mit Zweifachbestätigung am T-Deck",
+  "Schwarzes Brett für Aushänge",
+  "Schematische GPS-Übersicht lokal; OSM-Karten im Browser",
+  "Firmware: T-Deck Plus, T-Watch S3",
+  "Basiert auf disaster-radio, Open Source"
+ ],
+ "steps": [
+  "Firmware aus dem Release v@VERSION@ auf T-Deck Plus oder T-Watch S3 flashen, Antenne und Strom anschließen.",
+  "Standalone: am T-Deck die Touch-Kalibrierung abschließen und direkt bedienen.",
+  "Zusätzlich: Handy ins WLAN DisAHRsterRadio-XXXXXX, Browser 192.168.4.1."
+ ],
  "repo": "https://github.com/Pietwars/DisAHRsterRadio",
- "extra_urls": [["Download", "https://github.com/Pietwars/DisAHRsterRadio/releases"], ["Live-Demo", "https://pietwars.github.io/DisAHRsterRadio/"]],
- "links": [["Repository", "https://github.com/Pietwars/DisAHRsterRadio"], ["Release v@VERSION@", "@RELEASE@"], ["Live-Demo", "https://pietwars.github.io/DisAHRsterRadio/"], ["Projektseite", "https://pietwars.github.io/DisasterMesh/"]],
- "qr_url": "https://github.com/Pietwars/DisAHRsterRadio/releases",
- "qr_label": "Download",
+ "extra_urls": [
+  [
+   "Release v@VERSION@",
+   "@RELEASE@"
+  ],
+  [
+   "Live-Demo",
+   "https://pietwars.github.io/DisAHRsterRadio/"
+  ]
+ ],
+ "links": [
+  [
+   "Repository",
+   "https://github.com/Pietwars/DisAHRsterRadio"
+  ],
+  [
+   "Release v@VERSION@",
+   "@RELEASE@"
+  ],
+  [
+   "Live-Demo",
+   "https://pietwars.github.io/DisAHRsterRadio/"
+  ]
+ ],
+ "qr_url": "@RELEASE@",
+ "qr_label": "Release v@VERSION@",
  "demo": "https://pietwars.github.io/DisAHRsterRadio/"
 }

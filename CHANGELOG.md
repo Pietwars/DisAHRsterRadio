@@ -1,6 +1,48 @@
 # Änderungen
 
-## Unveröffentlicht – offener Zugang
+## 0.9.4 · 19.10.2026 · T-Deck Plus Standalone
+
+- Neues zusätzliches Release-Paket `tdeck-standalone`: lokale Seiten für Chat, Hilfe, Brett, schematische GPS-Ortsübersicht und SETUP. WLAN-Oberfläche bleibt parallel verfügbar.
+- Vorhandenes Tal-und-Funk-Startbild, Tastaturabfrage, impulsbasierter Trackball mit Totzone/Schrittbegrenzung und Klick ohne Haltewiederholung.
+- GT911-Touch und geführte Erststart-Kalibrierung: drei Ziele plus Kontrollpunkt, Speicherung in eigenem NVS-Namensraum; wiederholbar im SETUP-Menü.
+- TFT_eSPI-SPI-Registerfix für den beobachteten StoreProhibited-Absturz; nur eine geprüfte Zeile der gepinnten Bibliothek wird angepasst.
+- Teststand auf Nutzergerät bestätigt: Start, lokale Bedienung, Tastatur, Trackball, Touch und Hilfen. GPS/Karte im Freien und umfassende Funk-/Dauertests noch offen. Kein vollständiger OSM-Renderer auf dem TFT.
+- CI prüft Eingabesequenzen, Kalibriertransformation, Versionen und Speicher; Standalone-ZIP enthält passende ELF/Map und Hash-Metadaten.
+- README, Geräteübersicht, Flash-/Bedienanleitung und Release-/Flyer-Hinweise aktualisiert. v0.9.3 bleibt unverändert verfügbar. LoRaLayer2 bleibt eigenständig, ohne MeshCore-Kompatibilität.
+
+## 0.9.3 · 19.10.2026 · LittleFS-/Webserver-Hotfix
+
+- **Weboberfläche beim Start:** Auf T-Deck Plus und T-Watch S3 wird SD/LittleFS vor dem WLAN-/HTTP-Server initialisiert. Dadurch kann `serveStatic()` die Weboberfläche beim ersten Boot registrieren (Fix aus PR #26).
+- **Unverändert:** LoRa-Funkprofil, Board-Pins, Flash-Partitionen, Chat, Karte und Offline-Funktionen.
+- **Pakete:** Für T-Deck Plus und T-Watch S3 neu gebaut, mit LittleFS-Abbild, Factory-Datei, Anleitung und SHA256-Prüfsummen. Keine Hardware-Abnahme; funktionaler Boot-/Funk-Test bleibt erforderlich.
+- **v0.9.2:** Wurde vor dem Hotfix erstellt und soll nicht mehr als aktuelle Firmware verwendet werden.
+
+
+## 0.9.2 · 19.10.2026 · Release
+
+- **README und Doku:** Projektfamilie mit den vier aktiven Repositorys (DisAHRsterRadio-MeshCore, DisAHRsterRadio, HaldenFunk, HaldenFunk-MeshCore); Pietwars/DisasterMesh ist archiviert und gehört nicht mehr dazu. Geräte-Tabelle und Schnellstart nennen nur noch T-Deck Plus und T-Watch S3.
+- **Flyer 0.9.2:** Druck- und Digital-PDF neu erzeugt (Release v0.9.2, Boards T-Deck Plus und T-Watch S3, ohne Link auf DisasterMesh).
+
+- **Neue Boards LILYGO T-Deck Plus und LILYGO T-Watch S3** (ESP32-S3, SX1262; Profile `tdeck-sx1262`, `twatch-s3-sx1262`). Minimale Anpassung der bestehenden Firmware, kein Umbau:
+  - Pins in `config.h` nach den MeshCore-Varianten.
+  - Neue Funktion `setupBoardPower()`: T-Deck-Peripherie-Pin, TFT/SD-Chip-Select, T-Watch-AXP2101 über XPowersLib 0.2.9.
+  - `LORA_DIO2_RF_SWITCH` (T-Deck: aus).
+  - 16-MB-Flash-Header, gleiche Partitionstabelle `custompart.csv`.
+  - Kein Display-Treiber: Das Display bleibt dunkel, Bedienung über WLAN.
+- **Release und CI nur noch für T-Deck Plus und T-Watch S3** (`release.yml`, `build.yml`, `tools/package.sh` Standard). Heltec V2, T3-S3 und T3 V1.6.1 werden nicht mehr gebaut; die Profile bleiben im Code, das Release v0.9.1 bleibt unverändert.
+- **Flash- und Speicherprüfung im CI** (aus DisAHRsterRadio-MeshCore 0.9.4, angepasst an LittleFS und die Boards hier): `tools/validate_memory.py` prüft nach jedem Firmware-Build Image-Header (Chip-ID, Flashgröße), Segmente und Prüfsumme/SHA-256, Partitionstabelle (MD5, Überlappung, Grenzen), dass `firmware.bin` und `littlefs.bin` in ihre Partitionen passen, und die Linker-Werte für Flash und statisches RAM. Boardvertrag `tools/memory_boards.json` (T3-S3 und T3 V1.6.1: 4 MiB, Heltec V2: 8 MiB Flash, davon 4 MiB partitioniert). Bericht `speicherbericht.md/json` im Job Summary und im Artefakt; Hosttests `tests/memory_validation.test.py`. Firmware unverändert.
+
+## 0.9.1 · 18.10.2026 · Release
+
+- **Flyer 0.9.1 (nachgereicht):** Druck-PDF (QR-Code zum Release v0.9.1 und zur Demo) und Digital-PDF (klickbare Links) neu erzeugt, mit Vorschau der aktuellen Weboberfläche; Inhalt und Boards entsprechen dem Release.
+
+Versionsangleich der Projektfamilie auf 0.9.1 (Sprung von 0.1.1-alpha). Firmware-Funktionen unverändert bis auf die Punkte unten (offener Zugang); Firmwarekennung `0.9.1`.
+
+- Release-Paket vorerst nur für **Heltec WiFi LoRa 32 V2** (`release.yml`); T3-S3 und T3 V1.6.1 bleiben im Code und im CI. Den LILYGO T-Deck Plus unterstützt diese Firmware nicht.
+- README, Projektfamilie und README-Bilder (aus der Live-Demo neu aufgenommen) auf 0.9.1.
+- Auf echter Hardware ist diese Firmware in 0.9.1 nicht abgenommen (getestet wurde 0.9.1 nur bei DisAHRsterRadio-MeshCore).
+
+### Offener Zugang (seit 0.1.1-alpha)
 
 - Offenes WLAN ohne Passwort, auch bei bestehenden Installationen.
 - Telnet (Port 23) deaktiviert, Konfiguration über USB; kombinierte WLAN+BLE-UART-Testprofile (`*-ble`, ohne PIN) ergänzt.

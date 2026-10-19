@@ -20,6 +20,11 @@
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
 #endif
+#ifdef BOARD_PMU_AXP2101
+#include <Wire.h>
+#include <XPowersLib.h>
+XPowersAXP2101 pmu;
+#endif
 
 
 #include <Layer1_RadioLib.h>
@@ -39,6 +44,9 @@
 #include "client/GPSClient.h"
 #endif
 #include "client/BoardClient.h"
+#ifdef TDECK_SCREEN
+#include "client/TDeckUI.h"
+#endif
 #include "client/BleUartClient.h"
 
 // middleware
@@ -94,6 +102,9 @@ Layer1Class *Layer1_main = NULL;
 DisasterRadio *radio = new DisasterRadio();
 DisasterHistory *history = NULL;
 BoardClient *board = NULL;
+#ifdef TDECK_SCREEN
+TDeckUI tdeckUI;
+#endif
 
 int internal_clients = 0;
 int clients = 0;
@@ -583,6 +594,45 @@ void setupNetwork()
 #endif
 }
 
+// Board-Versorgung vor LoRa einschalten (T-Deck: Peripherie-Pin, T-Watch S3: AXP2101-Kanäle)
+void setupBoardPower()
+{
+#ifdef BOARD_POWER_PIN
+  pinMode(BOARD_POWER_PIN, OUTPUT);
+  digitalWrite(BOARD_POWER_PIN, HIGH);
+#endif
+#ifdef BOARD_TFT_CS
+  pinMode(BOARD_TFT_CS, OUTPUT);
+  digitalWrite(BOARD_TFT_CS, HIGH);
+#endif
+#ifdef BOARD_SD_CS
+  pinMode(BOARD_SD_CS, OUTPUT);
+  digitalWrite(BOARD_SD_CS, HIGH);
+#endif
+#ifdef BOARD_TFT_BL
+  pinMode(BOARD_TFT_BL, OUTPUT);
+  digitalWrite(BOARD_TFT_BL, LOW);
+#endif
+#ifdef BOARD_PMU_AXP2101
+  if (pmu.begin(Wire, AXP2101_SLAVE_ADDRESS, BOARD_PMU_SDA, BOARD_PMU_SCL))
+  {
+    pmu.setALDO3Voltage(3300); pmu.enableALDO3();  // LoRa-Funkmodul
+    pmu.setALDO4Voltage(3300); pmu.enableALDO4();  // LoRa (muss an bleiben)
+    pmu.disableALDO2();                            // Display/Touch aus (kein Display-Treiber)
+    pmu.disableBLDO2();                            // Vibrationsmotor aus
+    pmu.enableBattVoltageMeasure();
+    Serial.println("* AXP2101: LoRa-Versorgung an");
+  }
+  else
+  {
+    Serial.println(" --> AXP2101 nicht gefunden (LoRa ohne Versorgung)");
+  }
+#endif
+#if defined(BOARD_POWER_PIN) || defined(BOARD_PMU_AXP2101)
+  delay(20); // Versorgung stabilisieren lassen
+#endif
+}
+
 void setup()
 {
 #ifdef DISABLE_BROWNOUT
@@ -601,9 +651,6 @@ void setup()
 
   Serial.printf("\nDisAHRsterRadio %s (%s) - basiert auf sudomesh/disaster-radio\n", DAR_VERSION, BOARD_NAME);
   delay(STARTUP_STAGGER_MS); // gestaffelter Start: Spannung stabilisieren lassen
-#ifndef WIFI_LATE
-  setupNetwork();
-#endif
   bootMark("SD");
   setupSD();
   bootMark("LittleFS");
@@ -612,11 +659,27 @@ void setup()
   setupSerial();
   board = new BoardClient(fsInitialized ? (fs::FS *)&LittleFS : NULL);
   radio->connect(board);
+#ifdef TDECK_SCREEN
+  tdeckUI.attachBoard(board);
+  radio->connect(&tdeckUI);
+#endif
+#ifndef WIFI_LATE
+  // HTTP und WebSocket erst nach SD/LittleFS und History starten.
+  // serveStatic() benoetigt ein bereits eingebundenes Dateisystem.
+  setupNetwork();
+#endif
   delay(STARTUP_STAGGER_MS);
+  bootMark("Versorgung");
+  setupBoardPower();
   bootMark("LoRa");
   setupLoRa();
   bootMark("Display");
   setupDisplay();
+#ifdef TDECK_SCREEN
+  bootMark("TDeck Display");
+  tdeckUI.beginDisplay();
+  if (history) history->replay(&tdeckUI);
+#endif
   setupGPS();
 #ifdef WIFI_LATE
   // WLAN zuletzt, mit Pause nach dem Funkmodul (Stromspitzen entzerren)
