@@ -65,8 +65,9 @@ void TDeckUI::beginDisplay() {
   Wire.begin(18, 8);
   Wire.setClock(100000);
   for (int pin : {TRACK_UP, TRACK_DOWN, TRACK_LEFT, TRACK_RIGHT, TRACK_CLICK}) pinMode(pin, INPUT_PULLUP);
-  // GPS on the Plus is connected to UART1 RX44/TX43. No LoRa GPS beacon by default.
-  gnss_.begin(9600, SERIAL_8N1, 44, 43);
+  pinMode(46, INPUT_PULLUP);
+  // GPS UART1: ESP32 RX43, TX44; LilyGO documentation default 9600 baud. No LoRa beacon.
+  gnss_.begin(9600, SERIAL_8N1, 43, 44);
   ready_ = true;
   dirty_ = true;
   Serial.println("[TDECK-UI] ST7789 display, keyboard, trackball and GPS started");
@@ -133,7 +134,8 @@ void TDeckUI::drawBoard() {
       String s=readable(p->text);
       int y=80;
       while(s.length()&&y<160) { text(8,y,s.substring(0,48));s.remove(0,min(48,(int)s.length())); y+=16; }
-      text(8,164,String("Noch ")+(uint32_t)max(0L,(long)((p->expiresAt-millis())/60000UL))+" min",GREEN);
+      int32_t remainingMs = (int32_t)(p->expiresAt - millis());
+      text(8,164,String("Noch ")+(remainingMs>0 ? (uint32_t)(remainingMs/60000UL) : 0UL)+" min",GREEN);
     }
   }
   lcd_.fillRect(0,186,320,30,PANEL);
@@ -267,6 +269,8 @@ void TDeckUI::handleKey(char ch) {
 }
 
 void TDeckUI::readKeyboard(){
+  // The keyboard asserts GPIO46 when a key is ready; avoid constant I2C traffic.
+  if(digitalRead(46) != LOW) return;
   Wire.requestFrom((uint8_t)KEYBOARD_ADDRESS,(uint8_t)1);
   if(Wire.available()){char ch=(char)Wire.read();if(ch)handleKey(ch);}
 }
