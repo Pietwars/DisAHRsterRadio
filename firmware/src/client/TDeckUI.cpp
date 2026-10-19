@@ -4,6 +4,11 @@
 #include <SPI.h>
 #include <math.h>
 
+// Arduino FSPI=0 is a bus enum, not the S3 register peripheral number.
+static_assert(SPI_PORT == 2, "TFT must address SPI2 registers on ESP32-S3");
+static_assert(SPI_USER_REG(SPI_PORT) == DR_REG_SPI2_BASE + 0x10,
+              "Invalid TFT SPI user register");
+
 namespace {
 constexpr uint16_t BG = 0x0862, PANEL = 0x10c4, WHITE_ = 0xffff;
 constexpr uint16_t GREEN = 0x9e85, ORANGE = 0xfce0, BLUE = 0x4d7f;
@@ -56,10 +61,17 @@ void TDeckUI::beginDisplay() {
   digitalWrite(BOARD_TFT_BL, LOW);
   pinMode(BOARD_TFT_DC, OUTPUT);
   SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI);
+  Serial.printf("[TDECK-UI] before lcd.init: SPI_PORT=%d USER_REG=0x%08lx heap=%u min=%u stack=%u\n",
+                SPI_PORT, (unsigned long)SPI_USER_REG(SPI_PORT), ESP.getFreeHeap(),
+                ESP.getMinFreeHeap(), (unsigned)uxTaskGetStackHighWaterMark(nullptr));
+  Serial.flush();
   lcd_.init();
+  Serial.println("[TDECK-UI] lcd.init OK");
+  Serial.flush();
   lcd_.setRotation(1);
   lcd_.setTextWrap(false);
   lcd_.fillScreen(BG);
+  Serial.println("[TDECK-UI] first fill OK");
   digitalWrite(BOARD_TFT_BL, HIGH);
 
   Wire.begin(18, 8);

@@ -4,6 +4,8 @@ on:
     paths:
       - 'firmware/**'
       - 'tools/package.sh'
+      - 'tools/tdeck_debug.py'
+      - 'docs/TDECK_DISPLAY_RECOVERY.md'
       - '.github/workflows/tdeck-screen-test.yml'
   workflow_dispatch:
 permissions:
@@ -35,8 +37,14 @@ jobs:
           p=next(Path('dist').glob('DisAHRsterRadio-Display-Test-*-tdeck-screen-test.zip'))
           with zipfile.ZipFile(p) as z:
               names=z.namelist()
-              for x in ('-factory.bin','/teile/firmware.bin','/teile/littlefs.bin','/SHA256SUMS','/ANLEITUNG.md'):
+              for x in ('-factory.bin','/teile/firmware.bin','/teile/littlefs.bin','/SHA256SUMS','/ANLEITUNG.md',
+                        '/debug/firmware.elf','/debug/firmware.map','/debug/build.json','/DISPLAY-TEST.md'):
                   assert any(n.endswith(x) for n in names), x
+              import hashlib, json
+              read=lambda suffix: z.read(next(n for n in names if n.endswith(suffix)))
+              elf_hash=hashlib.sha256(read('/debug/firmware.elf')).hexdigest()
+              assert elf_hash == read('/teile/firmware.bin')[176:208].hex()
+              assert elf_hash == json.loads(read('/debug/build.json'))['elf_sha256']
               print(f'OK: {p} ({p.stat().st_size} bytes)')
           PY
       - uses: actions/upload-artifact@v4

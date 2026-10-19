@@ -21,6 +21,9 @@ for env in $ENVS; do
   Z=$VERSION-${ZIP[$env]}; P=$NAMEPREFIX-$Z
   B=$FW/.pio/build/$env; D=$OUT/$P; T=$D/teile; rm -rf "$D"; mkdir -p "$T"
   (cd $FW && pio run -e $env) >/dev/null; cp $B/bootloader.bin $B/partitions.bin $B/firmware.bin "$T/"
+  if [ "$env" = tdeck-screen-test ]; then
+    python3 "$ROOT/tools/tdeck_debug.py" "$B" "$D/debug"
+  fi
   (cd $FW && pio run -e $env -t buildfs) >/dev/null; cp $B/littlefs.bin "$T/"
   BOOTAPP0=$(find ~/.platformio/packages/ -path '*framework-arduinoespressif32*' -name boot_app0.bin | head -1)
   cp "$BOOTAPP0" "$T/boot_app0.bin"
@@ -29,6 +32,10 @@ for env in $ENVS; do
   sed -e "s/@BOARD@/${NAME[$env]}/g" -e "s/@ZIP@/$Z/g" -e "s/@CHIP@/${CHIP[$env]}/g" -e "s/@BOOT@/${BOOT[$env]}/g" \
       -e "s/@VERSION@/$VERSION/g" -e "s/@COMMIT@/$COMMIT/g" "$ROOT/tools/ANLEITUNG.template.md" > "$D/ANLEITUNG.md"
   (cd "$D" && sha256sum $P-factory.bin teile/*.bin > SHA256SUMS)
+  if [ "$env" = tdeck-screen-test ]; then
+    cp "$ROOT/docs/TDECK_DISPLAY_RECOVERY.md" "$D/DISPLAY-TEST.md"
+    (cd "$D" && sha256sum debug/* DISPLAY-TEST.md >> SHA256SUMS)
+  fi
   rm -f "$OUT/$P.zip"; (cd "$OUT" && python3 -m zipfile -c "$P.zip" "$P")
   echo "$env -> $OUT/$P.zip"
 done
