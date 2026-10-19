@@ -1,0 +1,51 @@
+name: T-Deck original crash ELF reconstruction
+on:
+  pull_request:
+    paths: ['.github/workflows/tdeck-crash-repro.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-elf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      # Exact merge checkout used by original display-test Actions run 39239362411.
+      - uses: actions/checkout@v4
+        with:
+          ref: 06b238a8cced5eb4b0a00052cf2a95803e7c38a2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install platformio==6.2.0 esptool==5.6.0
+      - name: Original source and pinned dependencies, without the correction
+        run: cd firmware && pio run -e tdeck-screen-test
+      - name: Decode only on an exact ELF hash match
+        shell: python
+        run: |
+          import hashlib, pathlib, subprocess
+          build = pathlib.Path('firmware/.pio/build/tdeck-screen-test')
+          elf = build / 'firmware.elf'
+          expected = '3b320a93fefe7e5243dbf71a4cdab81e582d737c84ab9ee5bd2c3f513c31e1d0'
+          actual = hashlib.sha256(elf.read_bytes()).hexdigest()
+          lines = [f'Expected ELF SHA256: {expected}', f'Rebuilt ELF SHA256: {actual}']
+          if actual == expected:
+              matches = list((pathlib.Path.home()/'.platformio/packages').rglob('*addr2line'))
+              tool = next(p for p in matches if 'xtensa' in p.name)
+              addresses = ['0x420171f1','0x420171ee','0x420172c1','0x4201d933',
+                           '0x4201ab55','0x420294ee','0x4037e7f5']
+              lines += ['EXACT MATCH: decoding original panic addresses',
+                        subprocess.check_output([str(tool),'-pfiaC','-e',str(elf),*addresses],text=True)]
+          else:
+              lines += ['HASH MISMATCH: addresses deliberately NOT decoded with this ELF.']
+          report = '\n'.join(lines) + '\n'
+          print(report)
+          pathlib.Path('original-elf-result.txt').write_text(report)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TDeck-original-ELF-reconstruction
+          path: |
+            original-elf-result.txt
+            firmware/.pio/build/tdeck-screen-test/firmware.elf
+            firmware/.pio/build/tdeck-screen-test/firmware.map
+          if-no-files-found: error
