@@ -23,6 +23,8 @@ jobs:
         run: python tools/version.py --check && python tests/version.test.py
       - name: Kartenprüfung
         run: python tests/maps.test.py
+      - name: Flash- und Speicherprüfung (Hosttests, aus DisAHRsterRadio-MeshCore 0.9.4)
+        run: python tests/memory_validation.test.py -v
       - name: Kern-Abgleich (nur in Regionalvarianten mit region/CORE, z. B. HaldenFunk)
         if: hashFiles('region/CORE') != ''
         run: python tools/core_sync.py --check
@@ -45,16 +47,23 @@ jobs:
       # Firmware-Build und buildfs leeren jeweils das Build-Verzeichnis -> Ergebnisse nach jedem Schritt sichern
       - name: Firmware bauen
         working-directory: firmware
+        shell: bash
         run: |
-          pio run -e ${{ matrix.env }}
+          set -o pipefail
+          pio run -e ${{ matrix.env }} | tee ../build-${{ matrix.env }}.log
           mkdir -p ../artefakt && cp .pio/build/${{ matrix.env }}/{firmware,bootloader,partitions}.bin ../artefakt/
       - name: Dateisystem (Web-UI) bauen
         working-directory: firmware
         run: |
           pio run -e ${{ matrix.env }} -t buildfs
           cp .pio/build/${{ matrix.env }}/littlefs.bin ../artefakt/
+      - name: Flash/Header/Partitionen/Firmware und RAM prüfen
+        run: >-
+          python3 tools/validate_memory.py --env ${{ matrix.env }} --build-dir artefakt
+          --build-log build-${{ matrix.env }}.log --output artefakt/speicherbericht
+          && cat artefakt/speicherbericht.md >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
           name: firmware-${{ matrix.env }}
           if-no-files-found: error
-          path: artefakt/*.bin
+          path: artefakt/*

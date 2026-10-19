@@ -1,5 +1,9 @@
 # Änderungen
 
+## Unveröffentlicht (nach 0.9.1)
+
+- **Flash- und Speicherprüfung im CI** (aus DisAHRsterRadio-MeshCore 0.9.4, angepasst an LittleFS und die Boards hier): `tools/validate_memory.py` prüft nach jedem Firmware-Build Image-Header (Chip-ID, Flashgröße), Segmente und Prüfsumme/SHA-256, Partitionstabelle (MD5, Überlappung, Grenzen), dass `firmware.bin` und `littlefs.bin` in ihre Partitionen passen, und die Linker-Werte für Flash und statisches RAM. Boardvertrag `tools/memory_boards.json` (T3-S3 und T3 V1.6.1: 4 MiB, Heltec V2: 8 MiB Flash, davon 4 MiB partitioniert). Bericht `speicherbericht.md/json` im Job Summary und im Artefakt; Hosttests `tests/memory_validation.test.py`. Firmware unverändert.
+
 ## 0.9.1 · 18.10.2026 · Release
 
 - **Flyer 0.9.1 (nachgereicht):** Druck-PDF (QR-Code zum Release v0.9.1 und zur Demo) und Digital-PDF (klickbare Links) neu erzeugt, mit Vorschau der aktuellen Weboberfläche; Inhalt und Boards entsprechen dem Release.
