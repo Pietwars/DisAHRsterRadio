@@ -10,7 +10,7 @@
 
 **Offline-Chat über LoRa-Mesh für das Ahrtal** – ein Gerät spannt ein eigenes WLAN auf, man verbindet sich mit dem Handy und schreibt im Browser. Die Nachrichten laufen per LoRa von Gerät zu Gerät weiter, ganz ohne Internet oder Mobilfunk.
 
-Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https://github.com/sudomesh/disaster-radio)** mit der Ahrtal-Weboberfläche aus **[Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh)** – aber **ohne MeshCore**: Funk und Routing laufen über das ursprüngliche disaster-radio-Konzept (Layer1 + LoRaLayer2).
+Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https://github.com/sudomesh/disaster-radio)** mit der Ahrtal-Weboberfläche aus **[Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh)** (inzwischen archiviert) – aber **ohne MeshCore**: Funk und Routing laufen über das ursprüngliche disaster-radio-Konzept (Layer1 + LoRaLayer2).
 
 > ⚠️ **Wichtig:** DisAHRsterRadio ist **kein zertifiziertes Notrufsystem** und ersetzt keine Behörden-Kommunikation. In Lebensgefahr immer **112** wählen, wenn irgendwie möglich.
 
@@ -31,8 +31,8 @@ Dieses Projekt ist ein modernisierter Fork von **[sudomesh/disaster-radio](https
 | `t3s3-sx1262` | LILYGO T3-S3 (Hauptziel) | SX1262 (TCXO 1,8 V) |
 | `t3-v161-sx1276` | LILYGO T3 V1.6.1 | SX1276 |
 | `heltec-v2-sx1276` | Heltec WiFi LoRa 32 V2 | SX1276 |
-| `tdeck-sx1262` | LILYGO T-Deck Plus (Release ab dem nächsten Release, ohne Display-Treiber) | SX1262 (TCXO 1,8 V, DIO2 kein RF-Schalter) |
-| `twatch-s3-sx1262` | LILYGO T-Watch S3 (Release ab dem nächsten Release, ohne Display-Treiber) | SX1262 (TCXO 1,8 V), LoRa-Versorgung über AXP2101 |
+| `tdeck-sx1262` | LILYGO T-Deck Plus (im Release ab 0.9.2, ohne Display-Treiber) | SX1262 (TCXO 1,8 V, DIO2 kein RF-Schalter) |
+| `twatch-s3-sx1262` | LILYGO T-Watch S3 (im Release ab 0.9.2, ohne Display-Treiber) | SX1262 (TCXO 1,8 V), LoRa-Versorgung über AXP2101 |
 
 Seit der T-Deck/T-Watch-Anpassung baut das CI nur noch `tdeck-sx1262` und `twatch-s3-sx1262`; die übrigen Profile bleiben in `firmware/platformio.ini`. T-Deck Plus: Peripherie-Versorgung (GPIO 10) an, TFT- und SD-Chip-Select inaktiv, Hintergrundbeleuchtung aus. T-Watch S3: AXP2101 schaltet ALDO3/ALDO4 (LoRa) ein, Display und Vibration aus. Pins nach den MeshCore-Varianten `lilygo_tdeck` und `lilygo_twatch_s3` (Upstream-PR #2799), nicht auf Hardware gemessen.
 
@@ -102,7 +102,7 @@ Dann mit dem WLAN `DisAHRsterRadio-XXXXXX` verbinden und `http://192.168.4.1` (o
 
 ## Fertige Flash-Pakete
 
-Fertige Pakete gibt es unter [Releases](https://github.com/Pietwars/DisAHRsterRadio/releases). Release v0.9.1 enthält nur das Paket für **Heltec WiFi LoRa 32 V2**. Ab dem nächsten Release: **LILYGO T-Deck Plus** (`DisAHRsterRadio-<Version>-tdeck.zip`) und **LILYGO T-Watch S3** (`DisAHRsterRadio-<Version>-twatch-s3.zip`). Jedes Paket enthält `…-factory.bin` (komplett an 0x0, z. B. mit https://espressif.github.io/esptool-js/), Einzelteile unter `teile/`, `SHA256SUMS` und deutscher `ANLEITUNG.md`. Update ohne Datenverlust: nur `teile/firmware.bin` an 0x10000.
+Fertige Pakete gibt es unter [Releases](https://github.com/Pietwars/DisAHRsterRadio/releases). Ab Release v0.9.2 nur noch **LILYGO T-Deck Plus** (`DisAHRsterRadio-<Version>-tdeck.zip`) und **LILYGO T-Watch S3** (`DisAHRsterRadio-<Version>-twatch-s3.zip`). Jedes Paket enthält `…-factory.bin` (komplett an 0x0, z. B. mit https://espressif.github.io/esptool-js/), Einzelteile unter `teile/`, `SHA256SUMS` und deutscher `ANLEITUNG.md`. Update ohne Datenverlust: nur `teile/firmware.bin` an 0x10000.
 
 Releases entstehen automatisch: Ein Tag `v<Version>` (passend zur Datei `VERSION`) startet den Workflow `release.yml`, der die Release-Boards (T-Deck Plus, T-Watch S3) baut, mit `tools/package.sh` packt, mit `tools/verify_release.py` prüft (bricht ab, wenn eine Datei fehlt, leer ist oder eine Prüfsumme nicht stimmt) und veröffentlicht (Versionen mit Zusatz wie `-alpha` als Vorabversion). Plattform und Bibliotheken sind fest gepinnt (`firmware/platformio.ini`), PlatformIO in der CI auf 6.2.0.
 
@@ -142,4 +142,4 @@ Noch nicht in `main` bzw. noch nicht getestet:
 - Grundlage: [sudomesh/disaster-radio](https://github.com/sudomesh/disaster-radio) und [sudomesh/LoRaLayer2](https://github.com/sudomesh/LoRaLayer2) – vielen Dank an Sudo Mesh und alle Beteiligten. Git-Historie von disaster-radio ist erhalten, Original-README: [README.upstream.md](../README.upstream.md).
 - `firmware/`: GPLv3 und AGPLv3 (dual, wie upstream) – siehe `LICENSE-GPL-3.0.txt`, `LICENSE-AGPL-3.0.txt`
 - `web/`: AGPLv3 (wie upstream). Die neue Ahrtal-Oberfläche stammt vom Autor aus DisasterMesh (dort MIT) und wird hier unter AGPLv3 veröffentlicht – MIT ist damit kompatibel.
-- Kopfbild: aus [Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh).
+- Kopfbild: aus [Pietwars/DisasterMesh](https://github.com/Pietwars/DisasterMesh) (archiviert).
