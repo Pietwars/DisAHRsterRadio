@@ -56,7 +56,7 @@ void TDeckUI::beginDisplay() {
   digitalWrite(BOARD_TFT_BL, LOW);
   pinMode(BOARD_TFT_DC, OUTPUT);
   SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI);
-  lcd_.init(240, 320);
+  lcd_.init();
   lcd_.setRotation(1);
   lcd_.setTextWrap(false);
   lcd_.fillScreen(BG);
