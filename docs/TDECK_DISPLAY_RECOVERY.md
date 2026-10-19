@@ -3,6 +3,39 @@
 Nur fuer PR #28 / `feature/tdeck-local-display-mvp`, Profil `tdeck-screen-test`.
 Kein Stable-Release, kein automatischer Merge, keine Aenderung an v0.9.3-Tags.
 
+## Bedienfix nach erfolgreichem Geraetestart
+
+Der Nutzer hat den Start und die laufende Anwendung nach dem SPI-Fix bestaetigt.
+Der nachfolgende Bedienfix bleibt im selben experimentellen Profil:
+
+- Trackball-Richtungen zaehlen jetzt Signalwechsel statt ruhender LOW-Pegel.
+  Vier zusammenhaengende Impulse pro Schritt, mindestens 350 ms Abstand;
+  keine aufgestauten Schritte. Ein Klick wird entprellt und erst nach Loslassen
+  erneut akzeptiert. Ruhende Pins und gehaltene Klicks loesen keine Wiederholung aus.
+- Tastatur wird alle 20 ms per I2C gelesen, unabhaengig von GPIO46. Die
+  Hersteller-Firmware fragt die Tastatur ebenfalls direkt ab. Der Startlog meldet
+  das Ergebnis der Tastatur- und Touch-Erkennung. Der I2C-Timeout ist begrenzt.
+- Das vorhandene Tal-und-Funk-Bild aus `docs/images/disahrsterradio-header.jpg`
+  erscheint fuer etwa 1,8 Sekunden, proportional eingepasst. Es liegt in Flash;
+  die Ausgabe nutzt nur eine einzelne Pixelzeile im RAM.
+- GT911-Touch auf beiden moeglichen I2C-Adressen: Tabs antippen, Hilfen mit zwei
+  getrennten Tippgesten bestaetigen, SEND bei Chat/Brett, Wischen zum Blaettern,
+  Zoom/Zentrierung unten auf der Karte. Mehrfinger-Gesten werden verworfen.
+- Beim ersten Start mit erkanntem Touch: drei Zielkreuze nacheinander antippen
+  und jeweils loslassen; anschliessend die Mitte zur Kontrolle antippen.
+  Nur eine gueltige, erfolgreich gepruefte Ausrichtung wird in einem eigenen
+  NVS-Namensraum gespeichert. Der Log meldet einen fehlgeschlagenen Schreibversuch.
+  Unter **SETUP / Touch neu kalibrieren** laesst sich der Ablauf wiederholen.
+  Trackball-Klick oder Escape bricht die Kalibrierung ab, ohne die alte zu ersetzen.
+
+Nach dem Flashen bitte pruefen: keine Bewegung ohne Rollen, eine bewusste
+Rollbewegung ergibt einen Menueschritt, langer Klick sendet keine Hilfe selbst,
+Tastaturtext und Enter funktionieren. Dann alle Touch-Zielkreuze durchlaufen,
+Tab-Treffer und Hilfebestaetigung testen, Neustart und gespeicherte Kalibrierung
+pruefen. Noch keine Hardware-Abnahme dieser neuen Eingabe-/Touch-Erweiterung.
+
+Herstellerreferenz: [LilyGO UnitTest](https://github.com/Xinyuan-LilyGO/T-Deck/blob/master/examples/UnitTest/UnitTest.ino).
+
 ## Befund vom 19.10.2026
 
 Der vollstaendige Nutzerlog zeigt `StoreProhibited`, `EXCCAUSE=0x1d`,

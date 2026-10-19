@@ -6,6 +6,7 @@ on:
       - 'tools/package.sh'
       - 'tools/tdeck_debug.py'
       - 'docs/TDECK_DISPLAY_RECOVERY.md'
+      - 'tests/tdeck_*'
       - '.github/workflows/tdeck-screen-test.yml'
   workflow_dispatch:
 permissions:
@@ -24,6 +25,10 @@ jobs:
         run: |
           python3 tools/version.py --check
           python3 tests/memory_validation.test.py -v
+          g++ -std=c++11 -Wall -Wextra -Werror tests/tdeck_trackball.test.cpp -o /tmp/tdeck-trackball-test
+          /tmp/tdeck-trackball-test
+          g++ -std=c++11 -Wall -Wextra -Werror tests/tdeck_touch.test.cpp -o /tmp/tdeck-touch-test
+          /tmp/tdeck-touch-test
       - name: Display-Testfirmware und LittleFS bauen und als Factory-Paket packen
         env:
           NAMEPREFIX: DisAHRsterRadio-Display-Test
