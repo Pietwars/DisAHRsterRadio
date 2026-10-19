@@ -96,8 +96,9 @@ void TDeckUI::bottom(const String &value) {
 void TDeckUI::drawChat() {
   lcd_.fillRect(0,28,320,190,BG);
   int y = 34;
-  uint8_t start = count_>8?count_-8:0;
-  for (uint8_t i=start; i<count_; ++i) {
+  uint8_t start = count_>8+chatScroll_?count_-8-chatScroll_:0;
+  uint8_t stop = min((int)count_,(int)start+8);
+  for (uint8_t i=start; i<stop; ++i) {
     String s = readable(messages_[i]);
     while (s.length() && y < 182) {
       text(6,y,s.substring(0,50),i == count_-1?GREEN:WHITE_);
@@ -183,6 +184,7 @@ void TDeckUI::appendMessage(const String &s) {
   if(count_==12) {for(int i=1;i<12;i++)messages_[i-1]=messages_[i]; count_=11;}
   messages_[count_++]=s.substring(0,160);
   lastMessageAt_=millis();
+  chatScroll_=0;
   dirty_=true;
 }
 
@@ -231,6 +233,7 @@ void TDeckUI::movePage(int delta) {
   int n=((int)page_+delta+4)%4;
   page_=(Page)n;
   selected_=0;
+  chatScroll_=0;
   draft_="";
   quickPending_=255;
   dirty_=true;
@@ -288,7 +291,8 @@ void TDeckUI::readTrackball(){
   if(action==1)movePage(-1);
   else if(action==2)movePage(1);
   else if(action==5)handleClick();
-  else if(page_==QUICK) {selected_=(selected_+(action==3?6:2))%8;quickPending_=255;dirty_=true;}
+  else if(page_==QUICK) {selected_=(selected_+(action==3?7:1))%8;quickPending_=255;dirty_=true;}
+  else if(page_==CHAT) {const int maxScroll=max(0,(int)count_-8);chatScroll_=constrain((int)chatScroll_+(action==3?1:-1),0,maxScroll);dirty_=true;}
   else if(page_==BOARD){const size_t n=board_?board_->count():0;if(n){selected_=(selected_+n+(action==3?n-1:1))%n;dirty_=true;}}
   else if(page_==MAP){zoom_=constrain(zoom_+(action==3?-1:1),0,2);dirty_=true;}
 }
