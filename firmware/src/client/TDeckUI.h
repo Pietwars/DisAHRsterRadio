@@ -28,6 +28,7 @@ private:
   String draft_;
   uint8_t count_ = 0, selected_ = 0;
   uint8_t quickPending_ = 255;
+  uint8_t chatScroll_ = 0;
   uint32_t confirmAt_ = 0, lastKey_ = 0, lastPaint_ = 0, lastPosition_ = 0;
   uint32_t lastMessageAt_ = 0;
   bool ready_ = false, dirty_ = true, autoFollow_ = true;
