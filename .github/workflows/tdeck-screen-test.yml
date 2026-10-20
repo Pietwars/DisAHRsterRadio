@@ -1,0 +1,59 @@
+name: T-Deck Plus Display-Test
+on:
+  pull_request:
+    paths:
+      - 'firmware/**'
+      - 'tools/package.sh'
+      - 'tools/tdeck_debug.py'
+      - 'docs/TDECK_DISPLAY_RECOVERY.md'
+      - 'tests/tdeck_*'
+      - '.github/workflows/tdeck-screen-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tdeck-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install platformio==6.2.0 esptool==5.6.0
+      - name: Quellstand, Hardwareprofil und Speicherbudget pruefen
+        run: |
+          python3 tools/version.py --check
+          python3 tests/memory_validation.test.py -v
+          g++ -std=c++11 -Wall -Wextra -Werror tests/tdeck_trackball.test.cpp -o /tmp/tdeck-trackball-test
+          /tmp/tdeck-trackball-test
+          g++ -std=c++11 -Wall -Wextra -Werror tests/tdeck_touch.test.cpp -o /tmp/tdeck-touch-test
+          /tmp/tdeck-touch-test
+      - name: Display-Testfirmware und LittleFS bauen und als Factory-Paket packen
+        env:
+          NAMEPREFIX: DisAHRsterRadio-Display-Test
+          ENVS: tdeck-screen-test
+        run: tools/package.sh dist
+      - name: ZIP und Inhalte verifizieren
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          p=next(Path('dist').glob('DisAHRsterRadio-Display-Test-*-tdeck-screen-test.zip'))
+          with zipfile.ZipFile(p) as z:
+              names=z.namelist()
+              for x in ('-factory.bin','/teile/firmware.bin','/teile/littlefs.bin','/SHA256SUMS','/ANLEITUNG.md',
+                        '/debug/firmware.elf','/debug/firmware.map','/debug/build.json','/TDECK-BEDIENUNG.md'):
+                  assert any(n.endswith(x) for n in names), x
+              import hashlib, json
+              read=lambda suffix: z.read(next(n for n in names if n.endswith(suffix)))
+              elf_hash=hashlib.sha256(read('/debug/firmware.elf')).hexdigest()
+              assert elf_hash == read('/teile/firmware.bin')[176:208].hex()
+              assert elf_hash == json.loads(read('/debug/build.json'))['elf_sha256']
+              print(f'OK: {p} ({p.stat().st_size} bytes)')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TDeck-Display-Test-Firmware
+          path: dist/DisAHRsterRadio-Display-Test-*-tdeck-screen-test.zip
+          if-no-files-found: error

@@ -1,6 +1,5 @@
 #include <Arduino.h>
 
-// required for LoRa and/or AsyncSDServer libraries?
 #include <FS.h>
 #include <SPI.h>
 
@@ -9,18 +8,25 @@
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include <Preferences.h>
-#include <SD.h>
 #include <LittleFS.h>
+#include "config.h"
 #ifdef DAR_OMI
-#include <DNSServer.h> // Omi: Captive Portal, Seite oeffnet sich nach WLAN-Verbindung von selbst
+#include <DNSServer.h> // Captive Portal fuer Omi
+#endif
+#ifdef HAS_SD
+#include <SD.h>
 #endif
 #ifdef HAS_OLED
 #include <SSD1306Wire.h>
 #endif
-#include "config.h"
 #ifdef DISABLE_BROWNOUT
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
+#endif
+#ifdef BOARD_PMU_AXP2101
+#include <Wire.h>
+#include <XPowersLib.h>
+XPowersAXP2101 pmu;
 #endif
 
 
@@ -36,17 +42,23 @@
 #include "client/HistoryRecord.h"
 #include "client/LoRaClient.h"
 #include "client/StreamClient.h"
-#include "client/TCPClient.h"
 #include "client/WebSocketClient.h"
+#ifdef GPS_SERIAL
 #include "client/GPSClient.h"
+#endif
 #include "client/BoardClient.h"
+#ifdef TDECK_SCREEN
+#include "client/TDeckUI.h"
+#endif
 #include "client/BleUartClient.h"
 
 // middleware
 #include "middleware/Console.h"
 #include "middleware/HistoryReplay.h"
 // history
+#ifdef HAS_SD
 #include "history/HistorySD.h"
+#endif
 #include "history/HistoryMemory.h"
 
 #include "DisasterHistory.h"
@@ -66,10 +78,8 @@
 SSD1306Wire display(0x3c, OLED_SDA, OLED_SCL);
 #endif
 
-#ifdef SD_SCK
+#ifdef HAS_SD
 SPIClass sd_card(HSPI);
-#else
-SPIClass sd_card(VSPI_OR_FSPI);
 #endif
 
 
@@ -85,16 +95,9 @@ BleUartClient ble_client;
 
 #ifdef RL_SX1276
 SX1276 lora = new Module(LORA_CS, LORA_IRQ, LORA_RST, LORA_BUSY);
-  #ifdef DUAL_LORA
-  SX1276 lora2 = new Module(LORA2_CS, LORA2_IRQ, LORA2_RST, LORA2_BUSY);
-  #endif
 #endif
-
 #ifdef RL_SX1262
 SX1262 lora = new Module(LORA_CS, LORA_IRQ, LORA_RST, LORA_BUSY);
-  #ifdef DUAL_LORA
-  SX1262 lora2 = new Module(LORA2_CS, LORA2_IRQ, LORA2_RST, LORA2_BUSY);
-  #endif
 #endif
 
 LL2Class *LL2;
@@ -109,6 +112,9 @@ Layer1Class *Layer1_main = NULL;
 DisasterRadio *radio = new DisasterRadio();
 DisasterHistory *history = NULL;
 BoardClient *board = NULL;
+#ifdef TDECK_SCREEN
+TDeckUI tdeckUI;
+#endif
 
 int internal_clients = 0;
 int clients = 0;
@@ -203,7 +209,6 @@ void setupWiFi()
     dns_server.start(53, "*", WiFi.softAPIP());
 #endif
 
-    ip = WiFi.localIP();
     ip = WiFi.softAPIP();
     Serial.printf("\n==============================\nWLAN: %s\nOffenes WLAN - kein Passwort\nBrowser: http://%s\n==============================\n",
                   ssid, ip.toString().c_str());
@@ -233,7 +238,7 @@ void setupMDNS()
 
 void setupSD()
 {
-#ifdef SD_SCK
+#ifdef HAS_SD
   Serial.println("* Initializing SD card...");
   sd_card.begin(SD_SCK, SD_MISO, SD_MOSI, -1);
   if (SD.begin(SD_CS, sd_card))
@@ -262,23 +267,22 @@ void setupFS()
 
 bool checkFileIsReadable(FS &fs, const char *path)
 {
-  if (fs.exists(path))
-  {
-    return !!fs.open(path, "r");
-  }
-  return false;
+  return fs.exists(path) && fs.open(path, "r");
 }
 
 void setupHTTPSever()
 {
   Serial.println("* Initializing HTTP server...");
 
+#ifdef HAS_SD
   if (sdInitialized && checkFileIsReadable(SD, "/" INDEX_FILE))
   {
     Serial.println(" --> Serving web application from SD card");
     http_server.serveStatic("/", SD, "/").setDefaultFile(INDEX_FILE).setCacheControl("max-age=600");
   }
-  else if (fsInitialized && checkFileIsReadable(LittleFS, "/" INDEX_FILE))
+  else
+#endif
+  if (fsInitialized && checkFileIsReadable(LittleFS, "/" INDEX_FILE))
   {
     Serial.println(" --> Serving web application from LittleFS");
     http_server.serveStatic("/", LittleFS, "/").setDefaultFile(INDEX_FILE);
@@ -352,6 +356,7 @@ void setupHistory()
 {
   Serial.println("* Initializing history...");
 
+#ifdef HAS_SD
   if (sdInitialized)
   {
     HistorySD *history_sd_client = new HistorySD(&sd_card);
@@ -361,6 +366,7 @@ void setupHistory()
       history = history_sd_client;
     }
   }
+#endif
   if (!history)
   {
     Serial.println(" --> Storing (limited) history in memory");
@@ -456,41 +462,17 @@ void setupLoRa()
   char cfgStr[MESSAGE_LENGTH];
 #ifdef LORA_CS
   Serial.println("* Initializing LoRa...");
-  #ifdef LOPY4
-  SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI); //LORA_CS);
-  #endif
-  
-  #if defined(LORA_SCK) && !defined(LOPY4)
   SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI);
-  #endif
   pinMode(LORA_CS, OUTPUT);
   digitalWrite(LORA_CS, LOW);
-  #ifdef DUAL_LORA
-  pinMode(LORA2_CS, OUTPUT);
-  digitalWrite(LORA2_CS, HIGH);
-  #endif
   const RadioPreset &rp = activePreset();
   Layer1Class *Layer1_1 = new Layer1Class(&lora, 0, LORA_CS, LORA_RST, LORA_IRQ, rp.sf, rp.freqMHz, txPower, rp.bwKHz, LORA_TCXO, rp.cr, rp.dutyLimit);
   Layer1_main = Layer1_1;
-  #ifdef DUAL_LORA
-  digitalWrite(LORA_CS, HIGH);
-  digitalWrite(LORA2_CS, LOW);
-  Layer1Class *Layer1_2 = new Layer1Class(&lora2, 0, LORA2_CS, LORA2_RST, LORA2_IRQ, rp.sf, rp.freqMHz, txPower, rp.bwKHz, LORA_TCXO, rp.cr, rp.dutyLimit);
-  digitalWrite(LORA_CS, LOW);
-  digitalWrite(LORA2_CS, HIGH);
-  #endif
   if(Layer1_1->init())
   {
-    #ifndef DUAL_LORA
     Serial.printf(" --> Layer1 init succeeded\r\n");
     LL2 = new LL2Class(Layer1_1);
     LL2->setDutyCycle(rp.dutyLimit);
-    #else
-    if(Layer1_2->init()){
-      Serial.printf(" --> Dual Layer1 init succeeded\r\n");
-      LL2 = new LL2Class(Layer1_1, Layer1_2);
-    }
-    #endif
     LL2->setLocalAddress(nodeAddress);
     LL2->setInterval(routeInterval);
     LoRaClient *lora_client = new LoRaClient(LL2);
@@ -677,11 +659,50 @@ void setupNetwork()
   setupMDNS();
   bootMark("HTTP");
   setupHTTPSever();
-  bootMark("Telnet/WebSocket");
+  bootMark("WebSocket");
   // No network console on an open AP. Operator configuration stays on USB.
   setupWebSocket();
 #ifdef HAS_BLE
   setupBLE(); // optional combined build; never replaces WLAN
+#endif
+}
+
+// Board-Versorgung vor LoRa einschalten (T-Deck: Peripherie-Pin, T-Watch S3: AXP2101-Kanäle)
+void setupBoardPower()
+{
+#ifdef BOARD_POWER_PIN
+  pinMode(BOARD_POWER_PIN, OUTPUT);
+  digitalWrite(BOARD_POWER_PIN, HIGH);
+#endif
+#ifdef BOARD_TFT_CS
+  pinMode(BOARD_TFT_CS, OUTPUT);
+  digitalWrite(BOARD_TFT_CS, HIGH);
+#endif
+#ifdef BOARD_SD_CS
+  pinMode(BOARD_SD_CS, OUTPUT);
+  digitalWrite(BOARD_SD_CS, HIGH);
+#endif
+#ifdef BOARD_TFT_BL
+  pinMode(BOARD_TFT_BL, OUTPUT);
+  digitalWrite(BOARD_TFT_BL, LOW);
+#endif
+#ifdef BOARD_PMU_AXP2101
+  if (pmu.begin(Wire, AXP2101_SLAVE_ADDRESS, BOARD_PMU_SDA, BOARD_PMU_SCL))
+  {
+    pmu.setALDO3Voltage(3300); pmu.enableALDO3();  // LoRa-Funkmodul
+    pmu.setALDO4Voltage(3300); pmu.enableALDO4();  // LoRa (muss an bleiben)
+    pmu.disableALDO2();                            // Display/Touch aus (kein Display-Treiber)
+    pmu.disableBLDO2();                            // Vibrationsmotor aus
+    pmu.enableBattVoltageMeasure();
+    Serial.println("* AXP2101: LoRa-Versorgung an");
+  }
+  else
+  {
+    Serial.println(" --> AXP2101 nicht gefunden (LoRa ohne Versorgung)");
+  }
+#endif
+#if defined(BOARD_POWER_PIN) || defined(BOARD_PMU_AXP2101)
+  delay(20); // Versorgung stabilisieren lassen
 #endif
 }
 
@@ -708,9 +729,6 @@ void setup()
 
   Serial.printf("\nDisAHRsterRadio %s (%s) - basiert auf sudomesh/disaster-radio\n", DAR_VERSION, BOARD_NAME);
   delay(STARTUP_STAGGER_MS); // gestaffelter Start: Spannung stabilisieren lassen
-#ifndef WIFI_LATE
-  setupNetwork();
-#endif
   bootMark("SD");
   setupSD();
   bootMark("LittleFS");
@@ -719,11 +737,27 @@ void setup()
   setupSerial();
   board = new BoardClient(fsInitialized ? (fs::FS *)&LittleFS : NULL);
   radio->connect(board);
+#ifdef TDECK_SCREEN
+  tdeckUI.attachBoard(board);
+  radio->connect(&tdeckUI);
+#endif
+#ifndef WIFI_LATE
+  // HTTP und WebSocket erst nach SD/LittleFS und History starten.
+  // serveStatic() benoetigt ein bereits eingebundenes Dateisystem.
+  setupNetwork();
+#endif
   delay(STARTUP_STAGGER_MS);
+  bootMark("Versorgung");
+  setupBoardPower();
   bootMark("LoRa");
   setupLoRa();
   bootMark("Display");
   setupDisplay();
+#ifdef TDECK_SCREEN
+  bootMark("TDeck Display");
+  tdeckUI.beginDisplay();
+  if (history) history->replay(&tdeckUI);
+#endif
   setupGPS();
 #ifdef WIFI_LATE
   // WLAN zuletzt, mit Pause nach dem Funkmodul (Stromspitzen entzerren)
@@ -799,11 +833,9 @@ void loop()
 #endif
     }
   }
-  // reconnect only in WiFi client mode 
+  // reconnect only in WiFi client mode
 #ifdef WIFI_SSID
-  {
-    checkWiFi();
-  }
+  checkWiFi();
 #endif
 }
 

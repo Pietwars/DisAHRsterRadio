@@ -1,10 +1,10 @@
-> Neuer Entwicklungsstand: WLAN ohne Passwort; BLE-UART ohne PIN in den zusätzlichen Testprofilen. Alte Kopplungen bei Bedarf am Handy entfernen. Details: https://github.com/Pietwars/DisAHRsterRadio/blob/main/docs/OFFENER_ZUGANG.md
+> Offenes WLAN; BLE-UART ohne PIN in den zusätzlichen Testprofilen. Alte Kopplungen bei Bedarf am Handy entfernen. Details: https://github.com/Pietwars/DisAHRsterRadio/blob/main/docs/OFFENER_ZUGANG.md
 
 # DisAHRsterRadio für @BOARD@
 
 Version @VERSION@ (Commit @COMMIT@) · Quelle: https://github.com/Pietwars/DisAHRsterRadio
 
-> ⚠️ Kein zertifiziertes Notrufsystem. In Lebensgefahr immer **112** wählen. Diese Version ist auf echter Hardware **nicht abgenommen** (frühere Stände liefen beim Nutzer auf einem LILYGO T3 V1.6.1).
+> ⚠️ Kein zertifiziertes Notrufsystem. In Lebensgefahr immer **112** wählen. T-Deck-Standalone: Start, lokale Bedienung, Tastatur, Trackball, Touch-Kalibrierung und Hilfefunktionen vom Nutzer bestätigt. GPS/Karte im Freien und umfassende Funk-/Dauertests sind noch offen; keine pauschale Hardwareabnahme für andere Boards.
 
 ## 1. Zuerst die Antenne!
 
@@ -14,16 +14,21 @@ Version @VERSION@ (Commit @COMMIT@) · Quelle: https://github.com/Pietwars/DisAH
 
 1. Board per USB-Datenkabel an den Rechner (Chrome oder Edge am PC/Mac, nicht iPhone).
 2. https://espressif.github.io/esptool-js/ öffnen, Baudrate 921600 (bei Problemen 115200), **Connect** und den Port wählen.
-   - T3-S3: Wird kein Port gefunden, **BOOT** gedrückt halten, kurz **RST** drücken, BOOT loslassen.
-3. Bei **Flash Address** `0x0` eintragen und `DisAHRsterRadio-@ZIP@-factory.bin` wählen.
-4. Optional zuerst **Erase Flash** (löscht alles, auch gespeicherte Aushänge und Einstellungen).
+   - T-Deck Plus: Wird kein Port gefunden, den **Trackball** gedrückt halten und einschalten (bzw. Reset), dann loslassen.
+   - T-Watch S3: USB-C neu einstecken; bei ausgeschalteter Uhr kurz die Seitentaste drücken.
+3. Bei **Flash Address** `0x0` eintragen und `@PACKAGE@-factory.bin` wählen.
+4. Flash nicht routinemäßig löschen. **Erase Flash** löscht auch gespeicherte Aushänge und Einstellungen und ist für ein normales Update nicht nötig.
 5. **Program** und warten, bis „Leaving…“ erscheint. Dann **RST** drücken oder kurz vom Strom trennen.
 
 Die factory-Datei enthält Bootloader (@BOOT@), Partitionstabelle (0x8000), boot_app0 (0xe000), Firmware (0x10000) und Weboberfläche/Karten als LittleFS (0x200000).
 
-## 3. Ohne Passwort verbinden
+## 3. Verbinden
 
-Am Handy das WLAN `DisAHRsterRadio-XXXXXX` auswählen und ohne Passwort verbinden. Bei „Kein Internet“ verbunden bleiben, dann `http://192.168.4.1` öffnen. Telnet ist deaktiviert; Konfiguration erfolgt über USB. BLE-UART ohne PIN ist in den zusätzlichen `*-ble`-Testprofilen verfügbar; deren abweichende Partitionierung beachten.
+**Paket `tdeck-standalone`:** Lokale Bedienung auf dem T-Deck Plus mit Display, Tastatur, Trackball und Touch. Beim ersten Start drei Zielkreuze und danach die Mitte antippen; die geprüfte Ausrichtung wird gespeichert. Wiederholen unter **SETUP → Touch neu kalibrieren**, Abbruch per Trackball-Klick oder Escape. Das Tal-und-Funk-Startbild erscheint beim Einschalten. Chat/Brett: Tastatur und Enter oder SEND; Hilfen erfordern zwei getrennte Bestätigungen. Die lokale Karte ist eine schematische GPS-Ortsübersicht, kein vollständiger OSM-Renderer.
+
+**Pakete `tdeck` und `twatch-s3`:** Bedienung über WLAN; das Display bleibt dunkel. Das gilt nicht für `tdeck-standalone`. Die serielle Ausgabe (USB, 115200 Baud) zeigt den Start. Alle Pakete verwenden LoRaLayer2 und sind nicht mit MeshCore oder Meshtastic kompatibel.
+
+Am Handy das WLAN `DisAHRsterRadio-XXXXXX` auswählen und verbinden (höchstens 4 Handys). Bei „Kein Internet“ verbunden bleiben, dann `http://192.168.4.1` oder `http://disahrster.local` öffnen. Achtung: offenes, unverschlüsseltes WLAN – jede Person in Reichweite kann mitlesen und senden. Telnet ist entfernt; Konfiguration erfolgt über USB. BLE-UART ohne PIN ist in den zusätzlichen `*-ble`-Testprofilen verfügbar; deren abweichende Partitionierung beachten.
 
 ## 4. Update (nur Firmware)
 
@@ -37,7 +42,7 @@ Nur wenn sich Weboberfläche oder Karten geändert haben: zusätzlich `teile/lit
 
 | Datei | Adresse |
 |---|---|
-| `DisAHRsterRadio-@ZIP@-factory.bin` | 0x0 (komplett) |
+| `@PACKAGE@-factory.bin` | 0x0 (komplett) |
 | `teile/bootloader.bin` | @BOOT@ |
 | `teile/partitions.bin` | 0x8000 |
 | `teile/boot_app0.bin` | 0xe000 |
