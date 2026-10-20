@@ -7,4 +7,4 @@
 Alle verwenden LoRaLayer2. Keine Verbindung zu MeshCore-Geräten. Flash-/Bedienhilfe: [T-Deck](../docs/TDECK_DISPLAY_RECOVERY.md).
 
 
-Siehe [Haupt-README](../README.md). Optionaler WLAN-Client-Modus: `secrets.H` nach `secrets.h` kopieren und `WIFI_SSID`/`WIFI_PASSWORD` setzen.
+Siehe [Haupt-README](../README.md). Optionaler WLAN-Client-Modus: `secrets.example.h` nach `secrets.h` kopieren und `WIFI_SSID`/`WIFI_PASSWORD` setzen.

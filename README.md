@@ -82,3 +82,7 @@ Alle Demos sind simuliert.
 ## Lizenz
 
 Grundlage: [sudomesh/disaster-radio](https://github.com/sudomesh/disaster-radio) und [LoRaLayer2](https://github.com/sudomesh/LoRaLayer2) – danke an Sudo Mesh. `firmware/`: GPLv3 und AGPLv3 (dual, wie upstream); `web/`: AGPLv3. Kartendaten © OpenStreetMap-Mitwirkende, ODbL 1.0.
+
+## Firmware-Speicher
+
+Unbenutzte Altbestandteile werden entfernt, Zahleneingaben schlanker verarbeitet und SD-Code nur fuer Boards mit SD-Schacht eingebunden. Die bisherigen Messungen aelterer Profile zeigen etwa 26–38 KB weniger Firmware; fuer das T-Deck muss neu gemessen werden.
